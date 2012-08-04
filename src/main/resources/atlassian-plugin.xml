@@ -1,0 +1,20 @@
+<atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
+    <plugin-info>
+        <description>${project.description}</description>
+        <version>${project.version}</version>
+        <vendor name="${project.organization.name}" url="${project.organization.url}" />
+    </plugin-info>
+
+    <!-- internationalize your plugin -->
+    <resource type="i18n" name="org.whitesource.bamboo.plugins language" location="english"/>
+
+    <!-- defines an example task -->
+    <taskType name="whitesource" class="org.whitesource.bamboo.plugins.ExampleTask" key="test">
+      <description>A simple Hello World Task</description>
+      <!-- Categories available in 3.1: "builder", "test" and "deployment"
+      <category name=""/>
+      -->
+      <configuration class="org.whitesource.bamboo.plugins.ExampleTaskConfigurator"/>
+      <resource type="freemarker" name="edit" location="editExampleTask.ftl"/>
+    </taskType>
+</atlassian-plugin>
