@@ -8,7 +8,7 @@ import com.atlassian.bamboo.task.TaskResultBuilder;
 import com.atlassian.bamboo.task.TaskType;
 import org.jetbrains.annotations.NotNull;
 
-public class ExampleTask implements TaskType
+public class AgentTask implements TaskType
 {
     @NotNull
     @java.lang.Override

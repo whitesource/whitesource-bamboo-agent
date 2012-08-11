@@ -8,13 +8,11 @@
     <!-- internationalize your plugin -->
     <resource type="i18n" name="org.whitesource.bamboo.plugins language" location="english"/>
 
-    <!-- defines an example task -->
-    <taskType name="whitesource" class="org.whitesource.bamboo.plugins.ExampleTask" key="test">
-      <description>A simple Hello World Task</description>
-      <!-- Categories available in 3.1: "builder", "test" and "deployment"
-      <category name=""/>
-      -->
-      <configuration class="org.whitesource.bamboo.plugins.ExampleTaskConfigurator"/>
-      <resource type="freemarker" name="edit" location="editExampleTask.ftl"/>
+    <taskType name="WhiteSource Agent" class="org.whitesource.bamboo.plugins.AgentTask" key="ws.agent">
+      <description>Update WhiteSource OSS inventory.</description>
+      <category name="deployment" />
+      <category name="test" />
+      <configuration class="org.whitesource.bamboo.plugins.AgentTaskConfigurator"/>
+      <resource type="freemarker" name="edit" location="editAgentTask.ftl"/>
     </taskType>
 </atlassian-plugin>

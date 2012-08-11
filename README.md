@@ -1,4 +1,4 @@
-whitesource-bamboo-plugin
+WhiteSource Agent for Bamboo
 =========================
 
-White Source external update agent for Atlassian Bamboo
+WhiteSource external update agent for Atlassian Bamboo.

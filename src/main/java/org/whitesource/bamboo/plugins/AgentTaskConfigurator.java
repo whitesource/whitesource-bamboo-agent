@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class ExampleTaskConfigurator extends AbstractTaskConfigurator
+public class AgentTaskConfigurator extends AbstractTaskConfigurator
 {
     private TextProvider textProvider;
 
