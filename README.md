@@ -1,7 +1,7 @@
-WhiteSource Agent for Bamboo
+White Source Agent for Bamboo
 =========================
 
-WhiteSource external update agent for Atlassian Bamboo.
+White Source external update agent for Atlassian Bamboo.
 
 # License
 

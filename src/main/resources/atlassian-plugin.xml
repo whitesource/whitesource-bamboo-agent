@@ -8,8 +8,8 @@
     <!-- internationalize your plugin -->
     <resource type="i18n" name="org.whitesource.bamboo.plugins language" location="english"/>
 
-    <taskType name="WhiteSource Agent" class="org.whitesource.bamboo.plugins.AgentTask" key="ws.agent">
-      <description>Update WhiteSource OSS inventory.</description>
+    <taskType name="White Source Agent" class="org.whitesource.bamboo.plugins.AgentTask" key="ws.agent">
+      <description>Update White Source OSS inventory.</description>
       <category name="deployment" />
       <category name="test" />
       <configuration class="org.whitesource.bamboo.plugins.AgentTaskConfigurator"/>

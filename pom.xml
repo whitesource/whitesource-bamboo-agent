@@ -10,12 +10,12 @@
     <version>1.0-SNAPSHOT</version>
 
     <organization>
-        <name>WhiteSource Software</name>
+        <name>WhiteSource Software Ltd.</name>
         <url>http://www.whitesourcesoftware.com/</url>
     </organization>
 
-    <name>WhiteSource Agent for Bamboo</name>
-    <description>WhiteSource external update agent for Atlassian Bamboo.</description>
+    <name>White Source Agent for Bamboo</name>
+    <description>White Source external update agent for Atlassian Bamboo.</description>
     <packaging>atlassian-plugin</packaging>
 
     <properties>
