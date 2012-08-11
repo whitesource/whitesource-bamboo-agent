@@ -19,6 +19,7 @@
     <packaging>atlassian-plugin</packaging>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <bamboo.version>4.0</bamboo.version>
         <bamboo.data.version>3.2.2</bamboo.data.version>
         <amps.version>3.11</amps.version>
