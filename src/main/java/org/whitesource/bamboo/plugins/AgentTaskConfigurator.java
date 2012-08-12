@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2012 WhiteSource Software Ltd.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2012 WhiteSource Software Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package org.whitesource.bamboo.plugins;
 
@@ -34,7 +34,8 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator
 
     @NotNull
     @Override
-    public Map<String, String> generateTaskConfigMap(@NotNull final ActionParametersMap params, @Nullable final TaskDefinition previousTaskDefinition)
+    public Map<String, String> generateTaskConfigMap(@NotNull final ActionParametersMap params,
+            @Nullable final TaskDefinition previousTaskDefinition)
     {
         final Map<String, String> config = super.generateTaskConfigMap(params, previousTaskDefinition);
         config.put("say", params.getString("say"));
@@ -50,7 +51,8 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator
     }
 
     @Override
-    public void populateContextForEdit(@NotNull final Map<String, Object> context, @NotNull final TaskDefinition taskDefinition)
+    public void populateContextForEdit(@NotNull final Map<String, Object> context,
+            @NotNull final TaskDefinition taskDefinition)
     {
         super.populateContextForEdit(context, taskDefinition);
 
@@ -58,7 +60,8 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator
     }
 
     @Override
-    public void populateContextForView(@NotNull final Map<String, Object> context, @NotNull final TaskDefinition taskDefinition)
+    public void populateContextForView(@NotNull final Map<String, Object> context,
+            @NotNull final TaskDefinition taskDefinition)
     {
         super.populateContextForView(context, taskDefinition);
         context.put("say", taskDefinition.getConfiguration().get("say"));
