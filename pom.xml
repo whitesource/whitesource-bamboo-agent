@@ -23,6 +23,8 @@
         <bamboo.version>4.0</bamboo.version>
         <bamboo.data.version>3.2.2</bamboo.data.version>
         <amps.version>3.11</amps.version>
+        <atlassian.plugin.key>${groupId}.${artifactId}</atlassian.plugin.key>
+        <atlassian.plugin.directory>org/whitesource/bamboo/plugins</atlassian.plugin.directory>
     </properties>
 
     <dependencies>

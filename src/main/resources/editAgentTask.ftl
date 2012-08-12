@@ -1,1 +1,0 @@
-[@ww.textfield labelKey="org.whitesource.bamboo.plugins.say" name="say" required='true'/]

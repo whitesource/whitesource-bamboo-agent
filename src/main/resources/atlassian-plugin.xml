@@ -6,13 +6,13 @@
     </plugin-info>
 
     <!-- internationalize your plugin -->
-    <resource type="i18n" name="org.whitesource.bamboo.plugins language" location="english"/>
+    <resource type="i18n" name="i18n" location="${atlassian.plugin.directory}/i18n"/>
 
     <taskType name="White Source Agent" class="org.whitesource.bamboo.plugins.AgentTask" key="ws.agent">
       <description>Update White Source OSS inventory.</description>
       <category name="deployment" />
       <category name="test" />
       <configuration class="org.whitesource.bamboo.plugins.AgentTaskConfigurator"/>
-      <resource type="freemarker" name="edit" location="editAgentTask.ftl"/>
+      <resource type="freemarker" name="edit" location="${atlassian.plugin.directory}/editAgentTask.ftl"/>
     </taskType>
 </atlassian-plugin>

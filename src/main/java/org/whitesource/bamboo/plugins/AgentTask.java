@@ -17,6 +17,7 @@
 package org.whitesource.bamboo.plugins;
 
 import com.atlassian.bamboo.build.logger.BuildLogger;
+import com.atlassian.bamboo.configuration.ConfigurationMap;
 import com.atlassian.bamboo.task.TaskContext;
 import com.atlassian.bamboo.task.TaskException;
 import com.atlassian.bamboo.task.TaskResult;
@@ -31,10 +32,16 @@ public class AgentTask implements TaskType
     public TaskResult execute(@NotNull final TaskContext taskContext) throws TaskException
     {
         final BuildLogger buildLogger = taskContext.getBuildLogger();
+        final TaskResultBuilder taskResultBuilder = TaskResultBuilder.create(taskContext);
+        final ConfigurationMap configurationMap = taskContext.getConfigurationMap();
 
-        final String toSay = taskContext.getConfigurationMap().get("say");
-        buildLogger.addBuildLogEntry(toSay);
+        final String organizationToken = configurationMap.get(AgentTaskConfigurator.ORGANIZATION_TOKEN);
+        final String projectToken = configurationMap.get(AgentTaskConfigurator.PROJECT_TOKEN);
+        final String includesPattern = configurationMap.get(AgentTaskConfigurator.INCLUDES_PATTERN);
+        final String excludesPattern = configurationMap.get(AgentTaskConfigurator.EXCLUDES_PATTERN);
+        buildLogger.addBuildLogEntry("White Source configuration:" + "\r\tproject token is '" + projectToken
+                + "'\r\tincludes pattern is '" + includesPattern + "'\r\texcludes pattern is '" + excludesPattern + "'");
 
-        return TaskResultBuilder.create(taskContext).success().build();
+        return taskResultBuilder.build();
     }
 }
