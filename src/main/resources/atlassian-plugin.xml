@@ -3,6 +3,8 @@
         <description>${project.description}</description>
         <version>${project.version}</version>
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
+        <param name="plugin-icon">${atlassian.plugin.directory}/WhiteSourcePluginIcon.png</param>
+        <param name="plugin-logo">${atlassian.plugin.directory}/WhiteSourcePluginLogo.png</param>
     </plugin-info>
 
     <!-- internationalize your plugin -->
@@ -13,6 +15,7 @@
       <category name="deployment" />
       <category name="test" />
       <configuration class="org.whitesource.bamboo.plugins.AgentTaskConfigurator"/>
+      <resource type="download" name="icon" location="${atlassian.plugin.directory}/AgentTaskIcon.png" />
       <resource type="freemarker" name="edit" location="${atlassian.plugin.directory}/editAgentTask.ftl"/>
     </taskType>
 </atlassian-plugin>
