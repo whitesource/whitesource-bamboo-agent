@@ -16,6 +16,13 @@
 
 package org.whitesource.bamboo.plugins;
 
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import com.atlassian.bamboo.collections.ActionParametersMap;
 import com.atlassian.bamboo.task.AbstractTaskConfigurator;
 import com.atlassian.bamboo.task.TaskDefinition;
@@ -23,13 +30,6 @@ import com.atlassian.bamboo.utils.error.ErrorCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.opensymphony.xwork.TextProvider;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Map;
-import java.util.Set;
 
 public class AgentTaskConfigurator extends AbstractTaskConfigurator
 {
@@ -40,7 +40,7 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator
     private static final Set<String> FIELD_COLLECTION = ImmutableSet.<String> builder()
             .add(ORGANIZATION_TOKEN, PROJECT_TOKEN, INCLUDES_PATTERN, EXCLUDES_PATTERN).build();
     private static final String DEFAULT_INCLUDES_PATTERN = "lib/*.jar";
-    private TextProvider textProvider;  // KLUDGE: unused currently, see validate().
+    private TextProvider textProvider; // KLUDGE: unused currently, see validate().
 
     @NotNull
     @Override
@@ -91,6 +91,9 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator
         // via 'atlas-create-bamboo-plugin', however, this does not work at all,
         // see https://answers.atlassian.com/questions/20566 for a discussion;
         // replacing the call with getI18nBean().getText() works fine though.
+
+        // @todo: validate substitutions are populated already to avoid a build cycle!
+        // @todo: validate organization token with API to avoid a build cycle!
         final String organizationTokenValue = params.getString("organizationToken");
         if (StringUtils.isEmpty(organizationTokenValue))
         {

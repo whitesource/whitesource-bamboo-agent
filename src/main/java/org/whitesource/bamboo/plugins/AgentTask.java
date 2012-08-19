@@ -16,6 +16,12 @@
 
 package org.whitesource.bamboo.plugins;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.jetbrains.annotations.NotNull;
+
 import com.atlassian.bamboo.build.logger.BuildLogger;
 import com.atlassian.bamboo.configuration.ConfigurationMap;
 import com.atlassian.bamboo.task.TaskContext;
@@ -23,9 +29,9 @@ import com.atlassian.bamboo.task.TaskException;
 import com.atlassian.bamboo.task.TaskResult;
 import com.atlassian.bamboo.task.TaskResultBuilder;
 import com.atlassian.bamboo.task.TaskType;
-import org.jetbrains.annotations.NotNull;
+import com.atlassian.bamboo.variable.CustomVariableContextImpl;
 
-public class AgentTask implements TaskType
+public class AgentTask extends CustomVariableContextImpl implements TaskType
 {
     @NotNull
     @java.lang.Override
@@ -34,14 +40,37 @@ public class AgentTask implements TaskType
         final BuildLogger buildLogger = taskContext.getBuildLogger();
         final TaskResultBuilder taskResultBuilder = TaskResultBuilder.create(taskContext);
         final ConfigurationMap configurationMap = taskContext.getConfigurationMap();
+        final Map<String, String> variableMap = new HashMap<String, String>();
 
-        final String organizationToken = configurationMap.get(AgentTaskConfigurator.ORGANIZATION_TOKEN);
-        final String projectToken = configurationMap.get(AgentTaskConfigurator.PROJECT_TOKEN);
-        final String includesPattern = configurationMap.get(AgentTaskConfigurator.INCLUDES_PATTERN);
-        final String excludesPattern = configurationMap.get(AgentTaskConfigurator.EXCLUDES_PATTERN);
-        buildLogger.addBuildLogEntry("White Source configuration:" + "\r\tproject token is '" + projectToken
-                + "'\r\tincludes pattern is '" + includesPattern + "'\r\texcludes pattern is '" + excludesPattern + "'");
+        // @todo: convert to data loop.
+        variableMap.put("organizationToken",
+                substituteString(configurationMap.get(AgentTaskConfigurator.ORGANIZATION_TOKEN)));
+        variableMap.put("projectToken", substituteString(configurationMap.get(AgentTaskConfigurator.PROJECT_TOKEN)));
+        variableMap.put("includesPattern",
+                substituteString(configurationMap.get(AgentTaskConfigurator.INCLUDES_PATTERN)));
+        variableMap.put("excludesPattern",
+                substituteString(configurationMap.get(AgentTaskConfigurator.EXCLUDES_PATTERN)));
+
+        buildLogger.addBuildLogEntry("White Source configuration:");
+        for (Entry<String, String> variable : variableMap.entrySet())
+        {
+            final String value = variable.getValue().contains("password") ? "********" : variable.getValue();
+            buildLogger.addBuildLogEntry("... " + variable.getKey() + " is '" + value + "'");
+            if (!isSubstitutionValid(variable.getValue()))
+            {
+                buildLogger
+                        .addErrorLogEntry("... "
+                                + variable.getKey()
+                                + " contains unresolved variable substitutions - please add a matching global or plan variable.");
+                taskResultBuilder.failed();
+            }
+        }
 
         return taskResultBuilder.build();
+    }
+
+    private boolean isSubstitutionValid(final String variable)
+    {
+        return !variable.contains("${");
     }
 }
