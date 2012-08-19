@@ -24,6 +24,7 @@
         <amps.version>3.11</amps.version>
         <atlassian.plugin.key>${project.groupId}.${project.artifactId}</atlassian.plugin.key>
         <atlassian.plugin.directory>org/whitesource/bamboo/plugins</atlassian.plugin.directory>
+        <wss.agents.version>1.1.0</wss.agents.version>
     </properties>
 
     <dependencies>
@@ -31,12 +32,12 @@
         <dependency>
             <groupId>org.whitesource</groupId>
             <artifactId>wss-agent-api</artifactId>
-            <version>1.0.0</version>
+            <version>${wss.agents.version}</version>
         </dependency>
         <dependency>
             <groupId>org.whitesource</groupId>
             <artifactId>wss-agent-api-client</artifactId>
-            <version>1.0.0</version>
+            <version>${wss.agents.version}</version>
         </dependency>
 
         <!-- Atlassian -->
@@ -48,11 +49,6 @@
         </dependency>
 
         <!-- Others -->
-        <dependency>
-            <groupId>org.sonatype.aether</groupId>
-            <artifactId>aether-util</artifactId>
-            <version>1.13.1</version>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
