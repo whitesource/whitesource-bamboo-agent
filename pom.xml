@@ -84,4 +84,32 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>whitesource</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.whitesource</groupId>
+                        <artifactId>whitesource-maven-plugin</artifactId>
+                        <version>1.0.0</version>
+                        <configuration>
+                            <orgToken>${env.WSS_ORGANIZATION_TOKEN}</orgToken>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
