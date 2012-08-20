@@ -72,6 +72,7 @@
                 <configuration>
                     <productVersion>${bamboo.version}</productVersion>
                     <productDataVersion>${bamboo.data.version}</productDataVersion>
+                    <!-- <productDataPath>${basedir}/src/test/resources/generated-test-resources.zip</productDataPath>  -->
                 </configuration>
             </plugin>
 
