@@ -16,11 +16,23 @@
 
 package org.whitesource.bamboo.plugins;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
+import org.whitesource.agent.api.dispatch.UpdateInventoryResult;
+import org.whitesource.agent.api.model.AgentProjectInfo;
+import org.whitesource.api.client.WhitesourceService;
+import org.whitesource.api.client.WssServiceException;
+import org.whitesource.bamboo.agent.BaseOssInfoExtractor;
+import org.whitesource.bamboo.agent.Constants;
+import org.whitesource.bamboo.agent.GenericOssInfoExtractor;
+import org.whitesource.bamboo.agent.WssUtils;
 
 import com.atlassian.bamboo.build.logger.BuildLogger;
 import com.atlassian.bamboo.configuration.ConfigurationMap;
@@ -30,9 +42,14 @@ import com.atlassian.bamboo.task.TaskResult;
 import com.atlassian.bamboo.task.TaskResultBuilder;
 import com.atlassian.bamboo.task.TaskType;
 import com.atlassian.bamboo.variable.CustomVariableContextImpl;
+import com.intellij.openapi.util.text.StringUtil;
 
 public class AgentTask extends CustomVariableContextImpl implements TaskType
 {
+    private static final String LOG_COMPONENT = "AgentTask";
+
+    protected final Logger log = LoggerFactory.getLogger(BaseOssInfoExtractor.class);
+
     @NotNull
     @java.lang.Override
     public TaskResult execute(@NotNull final TaskContext taskContext) throws TaskException
@@ -43,20 +60,61 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
         final Map<String, String> variableMap = new HashMap<String, String>();
 
         // @todo: convert to data loop.
-        variableMap.put("organizationToken",
-                substituteString(configurationMap.get(AgentTaskConfigurator.ORGANIZATION_TOKEN)));
-        variableMap.put("projectToken", substituteString(configurationMap.get(AgentTaskConfigurator.PROJECT_TOKEN)));
-        variableMap.put("includesPattern",
-                substituteString(configurationMap.get(AgentTaskConfigurator.INCLUDES_PATTERN)));
-        variableMap.put("excludesPattern",
-                substituteString(configurationMap.get(AgentTaskConfigurator.EXCLUDES_PATTERN)));
+        variableMap.put("organizationToken", configurationMap.get(AgentTaskConfigurator.ORGANIZATION_TOKEN));
+        variableMap.put("projectToken", configurationMap.get(AgentTaskConfigurator.PROJECT_TOKEN));
+        variableMap.put("includesPattern", configurationMap.get(AgentTaskConfigurator.INCLUDES_PATTERN));
+        variableMap.put("excludesPattern", configurationMap.get(AgentTaskConfigurator.EXCLUDES_PATTERN));
 
+        validateVariableSubstitution(buildLogger, taskResultBuilder, variableMap);
+
+        Collection<AgentProjectInfo> projectInfos = collectOssUsageInformation(buildLogger, variableMap, taskContext
+                .getBuildContext().getProjectName(), taskContext.getRootDirectory());
+
+        updateOssInventory(buildLogger, taskResultBuilder, variableMap, projectInfos);
+
+        return taskResultBuilder.build();
+    }
+
+    private void updateOssInventory(final BuildLogger buildLogger, final TaskResultBuilder taskResultBuilder,
+            final Map<String, String> variableMap, Collection<AgentProjectInfo> projectInfos)
+    {
+        if (CollectionUtils.isEmpty(projectInfos))
+        {
+            buildLogger.addBuildLogEntry("No open source information found.");
+        }
+        else
+        {
+            buildLogger.addBuildLogEntry("Sending to White Source:");
+            WhitesourceService service = createServiceClient();
+            try
+            {
+                final UpdateInventoryResult updateResult = service.update(variableMap.get("organizationToken"),
+                        projectInfos);
+                logUpdateResult(updateResult, buildLogger);
+                buildLogger.addBuildLogEntry("Successfully updated White Source.");
+            }
+            catch (WssServiceException e)
+            {
+                taskResultBuilder.failedWithError();
+                buildLogger.addErrorLogEntry("Communication with White Source failed.", e);
+            }
+            finally
+            {
+                service.shutdown();
+            }
+        }
+    }
+
+    private void validateVariableSubstitution(final BuildLogger buildLogger, final TaskResultBuilder taskResultBuilder,
+            final Map<String, String> variableMap)
+    {
         buildLogger.addBuildLogEntry("White Source configuration:");
         for (Entry<String, String> variable : variableMap.entrySet())
         {
-            final String value = variable.getValue().contains("password") ? "********" : variable.getValue();
+            final String value = variable.getKey().equals("organizationToken") ? "********" : variable.getValue();
+
             buildLogger.addBuildLogEntry("... " + variable.getKey() + " is '" + value + "'");
-            if (!isSubstitutionValid(variable.getValue()))
+            if (!isSubstitutionValid(value))
             {
                 buildLogger
                         .addErrorLogEntry("... "
@@ -65,12 +123,46 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
                 taskResultBuilder.failed();
             }
         }
+    }
 
-        return taskResultBuilder.build();
+    private Collection<AgentProjectInfo> collectOssUsageInformation(final BuildLogger buildLogger,
+            final Map<String, String> variableMap, final String projectName, final java.io.File rootDirectory)
+    {
+        buildLogger.addBuildLogEntry("Collecting OSS usage information");
+        // REVIEW: the naming concerning 'includes' vs. 'includesPattern' is confusing down the call stack!
+        BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(projectName, variableMap.get("projectToken"),
+                variableMap.get("includesPattern"), variableMap.get("excludesPattern"), rootDirectory, buildLogger);
+        Collection<AgentProjectInfo> projectInfos = extractor.extract();
+
+        return projectInfos;
     }
 
     private boolean isSubstitutionValid(final String variable)
     {
         return !variable.contains("${");
+    }
+
+    private WhitesourceService createServiceClient()
+    {
+        // @todo: the service URL should likely be configurable (see e.g. the Teamcity agent)!
+        WhitesourceService service = new WhitesourceService(Constants.AGENT_TYPE, Constants.AGENT_VERSION,
+                Constants.DEFAULT_SERVICE_URL);
+
+        // @todo: add configurable proxy handling (see e.g. the Teamcity agent)!
+        // service.getClient().setProxy("localhost", 8888, null, null);
+
+        return service;
+    }
+
+    private void logUpdateResult(UpdateInventoryResult result, BuildLogger buildLogger)
+    {
+        log.info(WssUtils.logMsg(LOG_COMPONENT, "update success"));
+
+        buildLogger.addBuildLogEntry("White Source update results: ");
+        buildLogger.addBuildLogEntry("White Source organization: " + result.getOrganization());
+        buildLogger.addBuildLogEntry(result.getCreatedProjects().size() + " Newly created projects:");
+        StringUtil.join(result.getCreatedProjects(), ",");
+        buildLogger.addBuildLogEntry(result.getUpdatedProjects().size() + " existing projects were updated:");
+        StringUtil.join(result.getUpdatedProjects(), ",");
     }
 }
