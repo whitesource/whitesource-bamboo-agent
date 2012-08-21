@@ -13,7 +13,7 @@
         <url>http://www.whitesourcesoftware.com/</url>
     </organization>
 
-    <name>White Source Agent for Bamboo</name>
+    <name>White Source agent for Bamboo</name>
     <description>White Source external update agent for Atlassian Bamboo.</description>
     <packaging>atlassian-plugin</packaging>
 

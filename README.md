@@ -1,4 +1,4 @@
-# White Source Agent for Bamboo
+# White Source agent for Bamboo
 
 White Source external update agent for Atlassian Bamboo.
 
