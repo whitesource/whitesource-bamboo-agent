@@ -1,117 +1,113 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>org.whitesource.bamboo.plugins</groupId>
-    <artifactId>whitesource-bamboo-agent</artifactId>
-    <version>1.0-SNAPSHOT</version>
-
-    <organization>
-        <name>WhiteSource Software Ltd.</name>
-        <url>http://www.whitesourcesoftware.com/</url>
-    </organization>
-
-    <name>White Source agent for Bamboo</name>
-    <description>White Source external update agent for Atlassian Bamboo.</description>
-    <packaging>atlassian-plugin</packaging>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <bamboo.version>4.0</bamboo.version>
-        <bamboo.data.version>3.2.2</bamboo.data.version>
-        <amps.version>3.11</amps.version>
-        <atlassian.plugin.key>${project.groupId}.${project.artifactId}</atlassian.plugin.key>
-        <atlassian.plugin.directory>org/whitesource/bamboo/plugins</atlassian.plugin.directory>
-        <wss.agents.version>1.1.0</wss.agents.version>
-    </properties>
-
-    <dependencies>
-        <!-- White Source -->
-        <dependency>
-            <groupId>org.whitesource</groupId>
-            <artifactId>wss-agent-api</artifactId>
-            <version>${wss.agents.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.whitesource</groupId>
-            <artifactId>wss-agent-api-client</artifactId>
-            <version>${wss.agents.version}</version>
-        </dependency>
-
-        <!-- Atlassian -->
-        <dependency>
-            <groupId>com.atlassian.bamboo</groupId>
-            <artifactId>atlassian-bamboo-web</artifactId>
-            <version>${bamboo.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- Others -->
-        <dependency>
-            <groupId>com.intellij</groupId>
-            <artifactId>openapi</artifactId>
-            <version>7.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.6</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <build>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.whitesource.bamboo.plugins</groupId>
+  <artifactId>whitesource-bamboo-agent</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <organization>
+    <name>WhiteSource Software Ltd.</name>
+    <url>http://www.whitesourcesoftware.com/</url>
+  </organization>
+  <name>White Source agent for Bamboo</name>
+  <description>White Source external update agent for Atlassian
+  Bamboo.</description>
+  <packaging>atlassian-plugin</packaging>
+  <properties>
+    <project.build.sourceEncoding>
+    UTF-8</project.build.sourceEncoding>
+    <bamboo.version>4.0</bamboo.version>
+    <bamboo.data.version>3.2.2</bamboo.data.version>
+    <amps.version>3.11</amps.version>
+    <atlassian.plugin.key>
+    ${project.groupId}.${project.artifactId}</atlassian.plugin.key>
+    <atlassian.plugin.directory>
+    org/whitesource/bamboo/plugins</atlassian.plugin.directory>
+    <wss.agents.version>1.1.0</wss.agents.version>
+  </properties>
+  <dependencies>
+    <!-- White Source -->
+    <dependency>
+      <groupId>org.whitesource</groupId>
+      <artifactId>wss-agent-api</artifactId>
+      <version>${wss.agents.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.whitesource</groupId>
+      <artifactId>wss-agent-api-client</artifactId>
+      <version>${wss.agents.version}</version>
+    </dependency>
+    <!-- Atlassian -->
+    <dependency>
+      <groupId>com.atlassian.bamboo</groupId>
+      <artifactId>atlassian-bamboo-web</artifactId>
+      <version>${bamboo.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- Others -->
+    <dependency>
+      <groupId>com.intellij</groupId>
+      <artifactId>openapi</artifactId>
+      <version>7.0.3</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.6</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.atlassian.maven.plugins</groupId>
+        <artifactId>maven-bamboo-plugin</artifactId>
+        <version>${amps.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <productVersion>${bamboo.version}</productVersion>
+          <productDataVersion>
+          ${bamboo.data.version}</productDataVersion>
+          <!-- <productDataPath>${basedir}/src/test/resources/generated-test-resources.zip</productDataPath> -->
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <profile>
+      <id>whitesource</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
         <plugins>
-            <plugin>
-                <groupId>com.atlassian.maven.plugins</groupId>
-                <artifactId>maven-bamboo-plugin</artifactId>
-                <version>${amps.version}</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <productVersion>${bamboo.version}</productVersion>
-                    <productDataVersion>${bamboo.data.version}</productDataVersion>
-                    <!-- <productDataPath>${basedir}/src/test/resources/generated-test-resources.zip</productDataPath> -->
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
+          <plugin>
+            <groupId>org.whitesource</groupId>
+            <artifactId>whitesource-maven-plugin</artifactId>
+            <version>1.1.2</version>
+            <configuration>
+              <orgToken>${env.WSS_ORGANIZATION_TOKEN}</orgToken>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>update</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
-    </build>
-
-    <profiles>
-        <profile>
-            <id>whitesource</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.whitesource</groupId>
-                        <artifactId>whitesource-maven-plugin</artifactId>
-                        <version>1.0.0</version>
-                        <configuration>
-                            <orgToken>${env.WSS_ORGANIZATION_TOKEN}</orgToken>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>update</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+      </build>
+    </profile>
+  </profiles>
 </project>
