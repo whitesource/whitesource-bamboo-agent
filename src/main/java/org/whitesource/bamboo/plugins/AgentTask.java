@@ -17,7 +17,6 @@
 package org.whitesource.bamboo.plugins;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -56,26 +55,19 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
         final BuildLogger buildLogger = taskContext.getBuildLogger();
         final TaskResultBuilder taskResultBuilder = TaskResultBuilder.create(taskContext);
         final ConfigurationMap configurationMap = taskContext.getConfigurationMap();
-        final Map<String, String> variableMap = new HashMap<String, String>();
 
-        // @todo: convert to data loop.
-        variableMap.put("organizationToken", configurationMap.get(AgentTaskConfigurator.ORGANIZATION_TOKEN));
-        variableMap.put("projectToken", configurationMap.get(AgentTaskConfigurator.PROJECT_TOKEN));
-        variableMap.put("includesPattern", configurationMap.get(AgentTaskConfigurator.INCLUDES_PATTERN));
-        variableMap.put("excludesPattern", configurationMap.get(AgentTaskConfigurator.EXCLUDES_PATTERN));
+        validateVariableSubstitution(buildLogger, taskResultBuilder, configurationMap);
 
-        validateVariableSubstitution(buildLogger, taskResultBuilder, variableMap);
+        Collection<AgentProjectInfo> projectInfos = collectOssUsageInformation(buildLogger, configurationMap,
+                taskContext.getBuildContext().getProjectName(), taskContext.getRootDirectory());
 
-        Collection<AgentProjectInfo> projectInfos = collectOssUsageInformation(buildLogger, variableMap, taskContext
-                .getBuildContext().getProjectName(), taskContext.getRootDirectory());
-
-        updateOssInventory(buildLogger, taskResultBuilder, variableMap, projectInfos);
+        updateOssInventory(buildLogger, taskResultBuilder, configurationMap, projectInfos);
 
         return taskResultBuilder.build();
     }
 
     private void updateOssInventory(final BuildLogger buildLogger, final TaskResultBuilder taskResultBuilder,
-            final Map<String, String> variableMap, Collection<AgentProjectInfo> projectInfos)
+            final Map<String, String> configurationMap, Collection<AgentProjectInfo> projectInfos)
     {
         if (CollectionUtils.isEmpty(projectInfos))
         {
@@ -87,7 +79,7 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
             WhitesourceService service = WssUtils.createServiceClient();
             try
             {
-                final String token = variableMap.get("organizationToken");
+                final String token = configurationMap.get(AgentTaskConfigurator.ORGANIZATION_TOKEN);
                 final UpdateInventoryResult updateResult = service.update(token, projectInfos);
                 logUpdateResult(updateResult, buildLogger);
                 buildLogger.addBuildLogEntry("Successfully updated White Source.");
@@ -105,12 +97,13 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
     }
 
     private void validateVariableSubstitution(final BuildLogger buildLogger, final TaskResultBuilder taskResultBuilder,
-            final Map<String, String> variableMap)
+            final Map<String, String> configurationMap)
     {
         buildLogger.addBuildLogEntry("White Source configuration:");
-        for (Entry<String, String> variable : variableMap.entrySet())
+        for (Entry<String, String> variable : configurationMap.entrySet())
         {
-            final String value = variable.getKey().equals("organizationToken") ? "********" : variable.getValue();
+            final String value = variable.getKey().equals(AgentTaskConfigurator.ORGANIZATION_TOKEN) ? "********"
+                    : variable.getValue();
 
             buildLogger.addBuildLogEntry("... " + variable.getKey() + " is '" + value + "'");
             if (!isSubstitutionValid(value))
@@ -125,12 +118,14 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
     }
 
     private Collection<AgentProjectInfo> collectOssUsageInformation(final BuildLogger buildLogger,
-            final Map<String, String> variableMap, final String projectName, final java.io.File rootDirectory)
+            final Map<String, String> configurationMap, final String projectName, final java.io.File rootDirectory)
     {
         buildLogger.addBuildLogEntry("Collecting OSS usage information");
         // REVIEW: the naming concerning 'includes' vs. 'includesPattern' is confusing down the call stack!
-        BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(projectName, variableMap.get("projectToken"),
-                variableMap.get("includesPattern"), variableMap.get("excludesPattern"), rootDirectory, buildLogger);
+        BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(projectName,
+                configurationMap.get(AgentTaskConfigurator.PROJECT_TOKEN),
+                configurationMap.get(AgentTaskConfigurator.INCLUDES_PATTERN),
+                configurationMap.get(AgentTaskConfigurator.EXCLUDES_PATTERN), rootDirectory, buildLogger);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
 
         return projectInfos;

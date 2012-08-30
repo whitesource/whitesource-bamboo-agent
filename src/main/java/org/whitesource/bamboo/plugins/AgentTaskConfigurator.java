@@ -97,22 +97,22 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator
 
         // @todo: validate substitutions are populated already to avoid a build cycle!
         // @todo: validate organization token with API to avoid a build cycle!
-        final String organizationTokenValue = params.getString("organizationToken");
+        final String organizationTokenValue = params.getString(ORGANIZATION_TOKEN);
         if (StringUtils.isEmpty(organizationTokenValue))
         {
-            errorCollection.addError("organizationToken",
+            errorCollection.addError(ORGANIZATION_TOKEN,
                     getI18nBean().getText("org.whitesource.bamboo.plugins.organizationToken.error"));
         }
-        final String projectTokenValue = params.getString("projectToken");
+        final String projectTokenValue = params.getString(PROJECT_TOKEN);
         if (StringUtils.isEmpty(projectTokenValue))
         {
-            errorCollection.addError("projectToken",
+            errorCollection.addError(PROJECT_TOKEN,
                     getI18nBean().getText("org.whitesource.bamboo.plugins.projectToken.error"));
         }
-        final String includesPatternValue = params.getString("includesPattern");
+        final String includesPatternValue = params.getString(INCLUDES_PATTERN);
         if (StringUtils.isEmpty(includesPatternValue))
         {
-            errorCollection.addError("includesPattern",
+            errorCollection.addError(INCLUDES_PATTERN,
                     getI18nBean().getText("org.whitesource.bamboo.plugins.includesPattern.error"));
         }
     }
