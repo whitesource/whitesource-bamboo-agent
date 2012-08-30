@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.whitesource.api.client.WhitesourceService;
+
 /**
  * Class to hold common utility helper methods.
  * 
@@ -35,6 +37,18 @@ public final class WssUtils
     private static final Pattern KEY_VALUE_SPLIT_PATTERN = Pattern.compile("=");
 
     /* --- Public methods --- */
+
+    public static WhitesourceService createServiceClient()
+    {
+        // @todo: the service URL should likely be configurable (see e.g. the Teamcity agent)!
+        WhitesourceService service = new WhitesourceService(Constants.AGENT_TYPE, Constants.AGENT_VERSION,
+                Constants.DEFAULT_SERVICE_URL);
+
+        // @todo: add configurable proxy handling (see e.g. the Teamcity agent)!
+        // service.getClient().setProxy("localhost", 8888, null, null);
+
+        return service;
+    }
 
     public static String logMsg(String component, String msg)
     {

@@ -30,7 +30,6 @@ import org.whitesource.agent.api.model.AgentProjectInfo;
 import org.whitesource.api.client.WhitesourceService;
 import org.whitesource.api.client.WssServiceException;
 import org.whitesource.bamboo.agent.BaseOssInfoExtractor;
-import org.whitesource.bamboo.agent.Constants;
 import org.whitesource.bamboo.agent.GenericOssInfoExtractor;
 import org.whitesource.bamboo.agent.WssUtils;
 
@@ -85,11 +84,11 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
         else
         {
             buildLogger.addBuildLogEntry("Sending to White Source:");
-            WhitesourceService service = createServiceClient();
+            WhitesourceService service = WssUtils.createServiceClient();
             try
             {
-                final UpdateInventoryResult updateResult = service.update(variableMap.get("organizationToken"),
-                        projectInfos);
+                final String token = variableMap.get("organizationToken");
+                final UpdateInventoryResult updateResult = service.update(token, projectInfos);
                 logUpdateResult(updateResult, buildLogger);
                 buildLogger.addBuildLogEntry("Successfully updated White Source.");
             }
@@ -140,18 +139,6 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
     private boolean isSubstitutionValid(final String variable)
     {
         return !variable.contains("${");
-    }
-
-    private WhitesourceService createServiceClient()
-    {
-        // @todo: the service URL should likely be configurable (see e.g. the Teamcity agent)!
-        WhitesourceService service = new WhitesourceService(Constants.AGENT_TYPE, Constants.AGENT_VERSION,
-                Constants.DEFAULT_SERVICE_URL);
-
-        // @todo: add configurable proxy handling (see e.g. the Teamcity agent)!
-        // service.getClient().setProxy("localhost", 8888, null, null);
-
-        return service;
     }
 
     private void logUpdateResult(UpdateInventoryResult result, BuildLogger buildLogger)
