@@ -44,8 +44,27 @@ public final class WssUtils
         WhitesourceService service = new WhitesourceService(Constants.AGENT_TYPE, Constants.AGENT_VERSION,
                 Constants.DEFAULT_SERVICE_URL);
 
-        // @todo: add configurable proxy handling (see e.g. the Teamcity agent)!
-        // service.getClient().setProxy("localhost", 8888, null, null);
+        // Reuse hosting application proxy settings, if any (see https://confluence.atlassian.com/x/nAFgDQ for the
+        // rationale).
+        final String httpProxyHost = System.getProperty("http.proxyHost");
+        if (httpProxyHost != null)
+        {
+            final int proxyPort = Integer.parseInt(System.getProperty("http.proxyPort", "80"));
+            final String proxyUser = System.getProperty("http.proxyUser");
+            final String proxyPassword = System.getProperty("http.proxyPassword");
+            service.getClient().setProxy("http://" + httpProxyHost, proxyPort, proxyUser, proxyPassword);
+        }
+        else
+        {
+            final String httpsProxyHost = System.getProperty("https.proxyHost");
+            if (httpsProxyHost != null)
+            {
+                final int proxyPort = Integer.parseInt(System.getProperty("https.proxyPort", "443"));
+                final String proxyUser = System.getProperty("http.proxyUser");
+                final String proxyPassword = System.getProperty("http.proxyPassword");
+                service.getClient().setProxy("https://" + httpsProxyHost, proxyPort, proxyUser, proxyPassword);
+            }
+        }
 
         return service;
     }
