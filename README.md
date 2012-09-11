@@ -9,6 +9,7 @@ More information can be found on the [Agents](http://docs.whitesourcesoftware.co
 
 * NOTE: Version 1.0.0 supports updating projects only, automatic creation of new ones is going to be delivered as a bug fix. 
 Therefore you'll need to [manually create an _Empty_ project using the web UI](http://docs.whitesourcesoftware.com/display/serviceDocs/Manually+-+using+the+application) upfront at the moment.
+* BETA: Due to the aforementioned restriction this is considered a beta release still.
 
 ### Supported job types
 
@@ -16,7 +17,10 @@ The plugin currently supports Free Style jobs. Support for Maven, Ivy and Gradle
 
 ### Status
 
-Actively developed (early stages though) and currently unsupported, thus considered a _beta_ quality.
+Actively developed (early stages though) and supported by White Source:
+
+* Please file issues via the White Source origin project [whitesource-bamboo-agent ](https://github.com/whitesource/whitesource-bamboo-agent/issues)
+* You may also contact White Source [Support](http://www.whitesourcesoftware.com/support)
 
 ### Release Notes
 
