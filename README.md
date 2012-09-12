@@ -7,10 +7,6 @@ White Source external update agent for Atlassian Bamboo.
 This plugin allows Bamboo users to easily create new White Source projects and update existing ones via a Task from your build. More features are planned for the near future.
 More information can be found on the [Agents](http://docs.whitesourcesoftware.com/display/docs/Agents) project documentation.
 
-* NOTE: Version 1.0.0 supports updating projects only, automatic creation of new ones is going to be delivered as a bug fix. 
-Therefore you'll need to [manually create an _Empty_ project using the web UI](http://docs.whitesourcesoftware.com/display/serviceDocs/Manually+-+using+the+application) upfront at the moment.
-* BETA: Due to the aforementioned restriction this is considered a beta release still.
-
 ### Supported job types
 
 The plugin currently supports Free Style jobs. Support for Maven, Ivy and Gradle jobs is on the roadmap.
@@ -24,9 +20,11 @@ Actively developed (early stages though) and supported by White Source:
 
 ### Release Notes
 
-#### 1.0.0
+NOTE: There is no official release yet!
 
-Release 1.0.0 adds a Task to update a White Source Open Source Software (OSS) inventory.
+#### ~~1.0.0~~
+
+~~Release 1.0.0 adds a Task to create or update a White Source Open Source Software (OSS) inventory.~~
 
 ## Installation
 
