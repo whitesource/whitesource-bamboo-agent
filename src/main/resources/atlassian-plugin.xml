@@ -5,6 +5,9 @@
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
         <param name="plugin-icon">${atlassian.plugin.directory}/WhiteSourcePluginIcon.png</param>
         <param name="plugin-logo">${atlassian.plugin.directory}/WhiteSourcePluginLogo.png</param>
+        <param name="plugin-banner">${atlassian.plugin.directory}/WhiteSourcePluginBanner.png</param>
+        <param name="vendor-icon">${atlassian.plugin.directory}/WhiteSourceVendorIcon.png</param>
+        <param name="vendor-logo">${atlassian.plugin.directory}/WhiteSourceVendorLogo.png</param>
     </plugin-info>
 
     <!-- internationalize your plugin -->
