@@ -20,7 +20,7 @@ public class GenericOssInfoExtractorTest extends TestCase
     protected static final String PROJECT_TOKEN = "TestProjectToken";
     protected static final String PATTERN_NONE = "";
     protected static final String PATTERN_ALL = "lib/*.jar";
-    protected static final int NUM_ALL = 10; // REVIEW: maybe derive this number dynamically in setUp(), or maybe not?
+    protected static final int NUM_ALL = 8; // REVIEW: maybe derive this number dynamically in setUp(), or maybe not?
     protected static final String PATTERN_WSS = "lib/wss*.jar";
     protected static final int NUM_WSS = 2;
 

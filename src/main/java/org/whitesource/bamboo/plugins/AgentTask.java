@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,6 @@ import com.atlassian.bamboo.task.TaskResult;
 import com.atlassian.bamboo.task.TaskResultBuilder;
 import com.atlassian.bamboo.task.TaskType;
 import com.atlassian.bamboo.variable.CustomVariableContextImpl;
-import com.intellij.openapi.util.text.StringUtil;
 
 public class AgentTask extends CustomVariableContextImpl implements TaskType
 {
@@ -143,8 +143,8 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
         buildLogger.addBuildLogEntry("White Source update results: ");
         buildLogger.addBuildLogEntry("White Source organization: " + result.getOrganization());
         buildLogger.addBuildLogEntry(result.getCreatedProjects().size() + " Newly created projects:");
-        StringUtil.join(result.getCreatedProjects(), ",");
+        StringUtils.join(result.getCreatedProjects(), ",");
         buildLogger.addBuildLogEntry(result.getUpdatedProjects().size() + " existing projects were updated:");
-        StringUtil.join(result.getUpdatedProjects(), ",");
+        StringUtils.join(result.getUpdatedProjects(), ",");
     }
 }

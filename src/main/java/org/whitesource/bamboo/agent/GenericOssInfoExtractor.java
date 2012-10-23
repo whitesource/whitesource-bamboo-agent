@@ -23,14 +23,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.whitesource.agent.api.ChecksumUtils;
 import org.whitesource.agent.api.model.AgentProjectInfo;
 import org.whitesource.agent.api.model.Coordinates;
 import org.whitesource.agent.api.model.DependencyInfo;
 
 import com.atlassian.bamboo.build.logger.BuildLogger;
-import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.openapi.util.text.StringUtil;
 
 /**
  * Concrete implementation for generic job types. Based on user entered locations of open source libraries.
@@ -64,13 +64,13 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
         includePatterns = new ArrayList<Pattern>();
         for (String pattern : this.includes)
         {
-            includePatterns.add(Pattern.compile(FileUtil.convertAntToRegexp(pattern)));
+            includePatterns.add(Pattern.compile(convertGlobToRegEx(pattern)));
         }
 
         excludePatterns = new ArrayList<Pattern>();
         for (String pattern : this.excludes)
         {
-            excludePatterns.add(Pattern.compile(FileUtil.convertAntToRegexp(pattern)));
+            excludePatterns.add(Pattern.compile(convertGlobToRegEx(pattern)));
         }
 
     }
@@ -96,7 +96,7 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
         else
         {
             buildLogger.addBuildLogEntry("Including files matching:");
-            buildLogger.addBuildLogEntry(StringUtil.join(includes, "\r"));
+            buildLogger.addBuildLogEntry(StringUtils.join(includes, "\r"));
             if (excludes.isEmpty())
             {
                 buildLogger.addBuildLogEntry("Excluding none.");
@@ -104,7 +104,7 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
             else
             {
                 buildLogger.addBuildLogEntry("Excluding files matching:");
-                buildLogger.addBuildLogEntry(StringUtil.join(excludes, "\r"));
+                buildLogger.addBuildLogEntry(StringUtils.join(excludes, "\r"));
             }
 
             extractOssInfo(checkoutDirectory, projectInfo.getDependencies());
@@ -133,7 +133,8 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
         {
             if (file.isFile())
             {
-                final String path = FileUtil.toSystemIndependentName(FileUtil.getRelativePath(absoluteRoot, file));
+                final String path = FilenameUtils.normalize(
+                        ResourceUtils.getRelativePath(file.getPath(), absoluteRoot.getPath(), File.separator), true);
 
                 boolean process = matchAny(path, includePatterns);
                 if (process)
@@ -188,5 +189,109 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
         }
 
         return info;
+    }
+
+    // NOTE: derived from http://stackoverflow.com/a/1248627/45773.
+    private String convertGlobToRegEx(String line)
+    {
+        log.debug("Input glob expression: " + line);
+        line = line.trim();
+        int strLen = line.length();
+        StringBuilder sb = new StringBuilder(strLen);
+        // Remove beginning and ending * globs because they're useless
+        if (line.startsWith("*"))
+        {
+            line = line.substring(1);
+            strLen--;
+        }
+        if (line.endsWith("*"))
+        {
+            line = line.substring(0, strLen - 1);
+            strLen--;
+        }
+        boolean escaping = false;
+        int inCurlies = 0;
+        for (char currentChar : line.toCharArray())
+        {
+            switch (currentChar)
+            {
+            case '*':
+                if (escaping)
+                    sb.append("\\*");
+                else
+                    sb.append(".*");
+                escaping = false;
+                break;
+            case '?':
+                if (escaping)
+                    sb.append("\\?");
+                else
+                    sb.append('.');
+                escaping = false;
+                break;
+            case '.':
+            case '(':
+            case ')':
+            case '+':
+            case '|':
+            case '^':
+            case '$':
+            case '@':
+            case '%':
+                sb.append('\\');
+                sb.append(currentChar);
+                escaping = false;
+                break;
+            case '\\':
+                if (escaping)
+                {
+                    sb.append("\\\\");
+                    escaping = false;
+                }
+                else
+                    escaping = true;
+                break;
+            case '{':
+                if (escaping)
+                {
+                    sb.append("\\{");
+                }
+                else
+                {
+                    sb.append('(');
+                    inCurlies++;
+                }
+                escaping = false;
+                break;
+            case '}':
+                if (inCurlies > 0 && !escaping)
+                {
+                    sb.append(')');
+                    inCurlies--;
+                }
+                else if (escaping)
+                    sb.append("\\}");
+                else
+                    sb.append("}");
+                escaping = false;
+                break;
+            case ',':
+                if (inCurlies > 0 && !escaping)
+                {
+                    sb.append('|');
+                }
+                else if (escaping)
+                    sb.append("\\,");
+                else
+                    sb.append(",");
+                break;
+            default:
+                escaping = false;
+                sb.append(currentChar);
+            }
+        }
+
+        log.debug("Output regular expression: " + sb.toString());
+        return sb.toString();
     }
 }
