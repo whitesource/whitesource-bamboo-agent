@@ -1,7 +1,6 @@
 package org.whitesource.bamboo.plugins;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
 import java.util.HashMap;
@@ -23,16 +22,12 @@ public class AgentTaskConfiguratorTest extends TestCase
     }
 
     @Test
-    public void testProjectTokenIsRandomOnCreate()
+    public void testProjectTokenIsNull()
     {
-        final Map<String, Object> firstContext = new HashMap<String, Object>();
-        assertTrue(firstContext.isEmpty());
-        configurator.populateContextForCreate(firstContext);
-        final String firstUUID = (String) firstContext.get(AgentTaskConfigurator.PROJECT_TOKEN);
-
-        final Map<String, Object> secondContext = new HashMap<String, Object>();
-        configurator.populateContextForCreate(secondContext);
-        final String secondUUID = (String) secondContext.get(AgentTaskConfigurator.PROJECT_TOKEN);
-        assertThat(firstUUID, not(equalTo(secondUUID)));
+        final Map<String, Object> context = new HashMap<String, Object>();
+        assertTrue(context.isEmpty());
+        configurator.populateContextForCreate(context);
+        final String token = (String) context.get(AgentTaskConfigurator.PROJECT_TOKEN);
+        assertThat(token, equalTo(null));
     }
 }
