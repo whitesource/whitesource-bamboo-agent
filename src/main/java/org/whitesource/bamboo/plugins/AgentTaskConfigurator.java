@@ -39,7 +39,6 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator
     public static final String EXCLUDES_PATTERN = "excludesPattern";
     private static final Set<String> FIELD_COLLECTION = ImmutableSet.<String> builder()
             .add(ORGANIZATION_TOKEN, PROJECT_TOKEN, INCLUDES_PATTERN, EXCLUDES_PATTERN).build();
-    private static final String DEFAULT_PROJECT_TOKEN = java.util.UUID.randomUUID().toString();
     private static final String DEFAULT_INCLUDES_PATTERN = "lib/*.jar";
     private TextProvider textProvider; // KLUDGE: unused currently, see validate().
 
@@ -60,8 +59,6 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator
     {
         super.populateContextForCreate(context);
         context.put(INCLUDES_PATTERN, DEFAULT_INCLUDES_PATTERN);
-        // @todo: derive actual project name from wherever it might be available at this point?!
-        context.put(PROJECT_TOKEN, DEFAULT_PROJECT_TOKEN);
         context.put("mode", "create");
     }
 
@@ -102,12 +99,6 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator
         {
             errorCollection.addError(ORGANIZATION_TOKEN,
                     getI18nBean().getText("org.whitesource.bamboo.plugins.organizationToken.error"));
-        }
-        final String projectTokenValue = params.getString(PROJECT_TOKEN);
-        if (StringUtils.isEmpty(projectTokenValue))
-        {
-            errorCollection.addError(PROJECT_TOKEN,
-                    getI18nBean().getText("org.whitesource.bamboo.plugins.projectToken.error"));
         }
         final String includesPatternValue = params.getString(INCLUDES_PATTERN);
         if (StringUtils.isEmpty(includesPatternValue))
