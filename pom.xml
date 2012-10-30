@@ -25,7 +25,7 @@
     ${project.groupId}.${project.artifactId}</atlassian.plugin.key>
     <atlassian.plugin.directory>
     org/whitesource/bamboo/plugins</atlassian.plugin.directory>
-    <wss.agents.version>1.1.0</wss.agents.version>
+    <wss.agents.version>1.2.1</wss.agents.version>
   </properties>
   <dependencies>
     <!-- White Source -->

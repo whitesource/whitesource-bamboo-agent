@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.whitesource.api.client.WhitesourceService;
+import org.whitesource.agent.client.WhitesourceService;
 
 /**
  * Class to hold common utility helper methods.
