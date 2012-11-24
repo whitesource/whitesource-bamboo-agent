@@ -37,11 +37,11 @@ All Task parameters support Bamboo variable substitution to allow for global, pl
 see [Using global, plan or build-specific variables](https://confluence.atlassian.com/x/nwQ_EQ) for details.
 
 * Please note that if the variable key contains the phrase "password", the value will be masked with "\*\*\*\*\*\*\*\*" in the Build Logs. 
-E.g. if the key is password, organizationTokenPassword or projectTokenPassword the value will be masked.
+E.g. if the key is password, apiKeyPassword or projectTokenPassword the value will be masked.
 
 ### Parameters
 
-* _Organization token_ - Uniquely identifies your organization's account in White Source.
+* _API key_ - Uniquely identifies your organization's White Source account.
 * _Project token_ - Uniquely identifies the project built by the job.
 * _Includes_ - Ant-style [FileSet](http://ant.apache.org/manual/Types/fileset.html) pattern to determine which files to include as dependencies. Relative to the job's workspace.
 * _Excludes_ - Ant-style [FileSet](http://ant.apache.org/manual/Types/fileset.html) pattern to determine which files to exclude as dependencies. Relative to the job's workspace.

@@ -79,8 +79,8 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
             WhitesourceService service = WssUtils.createServiceClient();
             try
             {
-                final String token = configurationMap.get(AgentTaskConfigurator.ORGANIZATION_TOKEN);
-                final UpdateInventoryResult updateResult = service.update(token, projectInfos);
+                final String apiKey = configurationMap.get(AgentTaskConfigurator.API_KEY);
+                final UpdateInventoryResult updateResult = service.update(apiKey, projectInfos);
                 logUpdateResult(updateResult, buildLogger);
                 buildLogger.addBuildLogEntry("Successfully updated White Source.");
             }
@@ -102,8 +102,8 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
         buildLogger.addBuildLogEntry("White Source configuration:");
         for (Entry<String, String> variable : configurationMap.entrySet())
         {
-            final String value = variable.getKey().equals(AgentTaskConfigurator.ORGANIZATION_TOKEN) ? "********"
-                    : variable.getValue();
+            final String value = variable.getKey().equals(AgentTaskConfigurator.API_KEY) ? "********" : variable
+                    .getValue();
 
             buildLogger.addBuildLogEntry("... " + variable.getKey() + " is '" + value + "'");
             if (!isSubstitutionValid(value))
