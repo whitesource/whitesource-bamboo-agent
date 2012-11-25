@@ -34,12 +34,16 @@ import com.opensymphony.xwork.TextProvider;
 public class AgentTaskConfigurator extends AbstractTaskConfigurator
 {
     public static final String API_KEY = "apiKey";
+    public static final String CHECK_POLICIES = "checkPolicies";
     public static final String PROJECT_TOKEN = "projectToken";
     public static final String INCLUDES_PATTERN = "includesPattern";
     public static final String EXCLUDES_PATTERN = "excludesPattern";
+    protected static final String OPTION_TRUE = "True";
+    protected static final String OPTION_FALSE = "False";
     private static final Set<String> FIELD_COLLECTION = ImmutableSet.<String> builder()
-            .add(API_KEY, PROJECT_TOKEN, INCLUDES_PATTERN, EXCLUDES_PATTERN).build();
+            .add(API_KEY, CHECK_POLICIES, PROJECT_TOKEN, INCLUDES_PATTERN, EXCLUDES_PATTERN).build();
     private static final String DEFAULT_INCLUDES_PATTERN = "lib/*.jar";
+    public static final String DEFAULT_CHECK_POLICIES = OPTION_FALSE;
     private TextProvider textProvider; // KLUDGE: unused currently, see validate().
 
     @NotNull
@@ -58,6 +62,7 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator
     public void populateContextForCreate(@NotNull final Map<String, Object> context)
     {
         super.populateContextForCreate(context);
+        context.put(CHECK_POLICIES, DEFAULT_CHECK_POLICIES);
         context.put(INCLUDES_PATTERN, DEFAULT_INCLUDES_PATTERN);
         context.put("mode", "create");
     }

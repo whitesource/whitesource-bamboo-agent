@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import org.whitesource.agent.api.dispatch.CheckPoliciesResult;
 import org.whitesource.agent.api.dispatch.UpdateInventoryResult;
 import org.whitesource.agent.api.model.AgentProjectInfo;
 import org.whitesource.agent.client.WhitesourceService;
@@ -67,7 +68,7 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
     }
 
     private void updateOssInventory(final BuildLogger buildLogger, final TaskResultBuilder taskResultBuilder,
-            final Map<String, String> configurationMap, Collection<AgentProjectInfo> projectInfos)
+            final ConfigurationMap configurationMap, Collection<AgentProjectInfo> projectInfos)
     {
         if (CollectionUtils.isEmpty(projectInfos))
         {
@@ -75,19 +76,41 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
         }
         else
         {
-            buildLogger.addBuildLogEntry("Sending to White Source:");
             WhitesourceService service = WssUtils.createServiceClient();
             try
             {
                 final String apiKey = configurationMap.get(AgentTaskConfigurator.API_KEY);
-                final UpdateInventoryResult updateResult = service.update(apiKey, projectInfos);
-                logUpdateResult(updateResult, buildLogger);
-                buildLogger.addBuildLogEntry("Successfully updated White Source.");
+                final Boolean checkPolicies = configurationMap.getAsBoolean(AgentTaskConfigurator.CHECK_POLICIES);
+
+                if (checkPolicies)
+                {
+                    buildLogger.addBuildLogEntry("Checking policies ...");
+                    CheckPoliciesResult result = service.checkPolicies(apiKey, projectInfos);
+                    if (result.hasRejections())
+                    {
+                        buildLogger.addErrorLogEntry("... open source rejected by organization policies.");
+                        taskResultBuilder.failedWithError();
+                    }
+                    else
+                    {
+                        buildLogger.addBuildLogEntry("... all dependencies conform with open source policies.");
+                        final UpdateInventoryResult updateResult = service.update(apiKey, projectInfos);
+                        logUpdateResult(updateResult, buildLogger);
+                        buildLogger.addBuildLogEntry("Successfully updated White Source.");
+                    }
+                }
+                else
+                {
+                    buildLogger.addBuildLogEntry("Ignoring policies ...");
+                    final UpdateInventoryResult updateResult = service.update(apiKey, projectInfos);
+                    logUpdateResult(updateResult, buildLogger);
+                    buildLogger.addBuildLogEntry("Successfully updated White Source.");
+                }
             }
             catch (WssServiceException e)
             {
-                taskResultBuilder.failedWithError();
                 buildLogger.addErrorLogEntry("Communication with White Source failed.", e);
+                taskResultBuilder.failedWithError();
             }
             finally
             {
