@@ -1,4 +1,5 @@
-[@ww.textfield labelKey="org.whitesource.bamboo.plugins.organizationToken" name="organizationToken" required='true'/]
+[@ww.textfield labelKey="org.whitesource.bamboo.plugins.apiKey" name="apiKey" required='true'/]
+[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.checkPolicies" name="checkPolicies"/]
 [@ww.textfield labelKey="org.whitesource.bamboo.plugins.projectToken" name="projectToken" required='false'/]
 [@ww.textfield labelKey="org.whitesource.bamboo.plugins.includesPattern" name="includesPattern" required='true'/]
 [@ww.textfield labelKey="org.whitesource.bamboo.plugins.excludesPattern" name="excludesPattern" required='false'/]

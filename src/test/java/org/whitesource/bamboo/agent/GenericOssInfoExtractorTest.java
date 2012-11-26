@@ -20,9 +20,10 @@ public class GenericOssInfoExtractorTest extends TestCase
     protected static final String PROJECT_TOKEN = "TestProjectToken";
     protected static final String PATTERN_NONE = "";
     protected static final String PATTERN_ALL = "lib/*.jar";
-    protected static final int NUM_ALL = 8; // REVIEW: maybe derive this number dynamically in setUp(), or maybe not?
+    protected static final int NUM_ALL = 12; // REVIEW: maybe derive this number dynamically in setUp(), or maybe not?
     protected static final String PATTERN_WSS = "lib/wss*.jar";
-    protected static final int NUM_WSS = 2;
+    protected static final int NUM_WSS = 3;
+    protected static final String dependenciesMismatch = "Expected number of dependencies doesn't match actual one (%s vs. %s), have you added/removed any dependencies?";
 
     @Override
     protected void setUp() throws Exception
@@ -45,7 +46,8 @@ public class GenericOssInfoExtractorTest extends TestCase
                 PATTERN_NONE, testDirectory, buildLogger);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
         assertEquals(1, projectInfos.size());
-        assertEquals(NUM_ALL, projectInfos.iterator().next().getDependencies().size());
+        int actual = projectInfos.iterator().next().getDependencies().size();
+        assertEquals(String.format(dependenciesMismatch, actual, NUM_ALL), NUM_ALL, actual);
     }
 
     @Test
@@ -55,7 +57,8 @@ public class GenericOssInfoExtractorTest extends TestCase
                 PATTERN_NONE, testDirectory, buildLogger);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
         assertEquals(1, projectInfos.size());
-        assertEquals(NUM_WSS, projectInfos.iterator().next().getDependencies().size());
+        int actual = projectInfos.iterator().next().getDependencies().size();
+        assertEquals(String.format(dependenciesMismatch, actual, NUM_WSS), NUM_WSS, actual);
     }
 
     @Test
@@ -65,6 +68,7 @@ public class GenericOssInfoExtractorTest extends TestCase
                 PATTERN_WSS, testDirectory, buildLogger);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
         assertEquals(1, projectInfos.size());
-        assertEquals(NUM_ALL - NUM_WSS, projectInfos.iterator().next().getDependencies().size());
+        int actual = projectInfos.iterator().next().getDependencies().size();
+        assertEquals(String.format(dependenciesMismatch, actual, NUM_ALL - NUM_WSS), NUM_ALL - NUM_WSS, actual);
     }
 }
