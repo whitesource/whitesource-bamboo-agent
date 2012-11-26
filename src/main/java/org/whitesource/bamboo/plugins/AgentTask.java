@@ -16,6 +16,8 @@
 
 package org.whitesource.bamboo.plugins;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,6 +32,7 @@ import org.whitesource.agent.api.dispatch.UpdateInventoryResult;
 import org.whitesource.agent.api.model.AgentProjectInfo;
 import org.whitesource.agent.client.WhitesourceService;
 import org.whitesource.agent.client.WssServiceException;
+import org.whitesource.agent.report.PolicyCheckReport;
 import org.whitesource.bamboo.agent.BaseOssInfoExtractor;
 import org.whitesource.bamboo.agent.GenericOssInfoExtractor;
 import org.whitesource.bamboo.agent.WssUtils;
@@ -41,6 +44,7 @@ import com.atlassian.bamboo.task.TaskException;
 import com.atlassian.bamboo.task.TaskResult;
 import com.atlassian.bamboo.task.TaskResultBuilder;
 import com.atlassian.bamboo.task.TaskType;
+import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.variable.CustomVariableContextImpl;
 
 public class AgentTask extends CustomVariableContextImpl implements TaskType
@@ -62,13 +66,15 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
         Collection<AgentProjectInfo> projectInfos = collectOssUsageInformation(buildLogger, configurationMap,
                 taskContext.getBuildContext().getProjectName(), taskContext.getRootDirectory());
 
-        updateOssInventory(buildLogger, taskResultBuilder, configurationMap, projectInfos);
+        updateOssInventory(buildLogger, taskResultBuilder, configurationMap, taskContext.getBuildContext(),
+                taskContext.getRootDirectory(), projectInfos);
 
         return taskResultBuilder.build();
     }
 
     private void updateOssInventory(final BuildLogger buildLogger, final TaskResultBuilder taskResultBuilder,
-            final ConfigurationMap configurationMap, Collection<AgentProjectInfo> projectInfos)
+            final ConfigurationMap configurationMap, final BuildContext buildContext, final File buildDirectory,
+            Collection<AgentProjectInfo> projectInfos)
     {
         if (CollectionUtils.isEmpty(projectInfos))
         {
@@ -86,6 +92,7 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
                 {
                     buildLogger.addBuildLogEntry("Checking policies ...");
                     CheckPoliciesResult result = service.checkPolicies(apiKey, projectInfos);
+                    reportCheckPoliciesResult(result, buildContext, buildDirectory, buildLogger);
                     if (result.hasRejections())
                     {
                         buildLogger.addErrorLogEntry("... open source rejected by organization policies.");
@@ -110,6 +117,11 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
             catch (WssServiceException e)
             {
                 buildLogger.addErrorLogEntry("Communication with White Source failed.", e);
+                taskResultBuilder.failedWithError();
+            }
+            catch (IOException e)
+            {
+                buildLogger.addErrorLogEntry("Generating policy check report failed.", e);
                 taskResultBuilder.failedWithError();
             }
             finally
@@ -157,6 +169,20 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
     private boolean isSubstitutionValid(final String variable)
     {
         return !variable.contains("${");
+    }
+
+    private void reportCheckPoliciesResult(CheckPoliciesResult result, final BuildContext buildContext,
+            final File buildDirectory, BuildLogger buildLogger) throws IOException
+    {
+        PolicyCheckReport report = new PolicyCheckReport(result, buildContext.getProjectName(),
+                buildContext.getBuildResultKey());
+        // @todo: report.generate() yields an exception 'Velocity is not initialized correctly', likely due to classpath
+        // conflicts, i.e. multiple Velocity versions on the classpath.
+        // File reportArchive = report.generate(buildDirectory, true);
+        // ArtifactDefinitionContext artifact = new ArtifactDefinitionContextImpl(reportArchive.getName(), false);
+        // artifact.setLocation(reportArchive.getParent());
+        // artifact.setCopyPattern(reportArchive.getName());
+        // buildContext.getArtifactContext().getDefinitionContexts().add(artifact);
     }
 
     private void logUpdateResult(UpdateInventoryResult result, BuildLogger buildLogger)

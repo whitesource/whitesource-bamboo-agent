@@ -39,6 +39,11 @@
       <artifactId>wss-agent-api-client</artifactId>
       <version>${wss.agents.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.whitesource</groupId>
+      <artifactId>wss-agent-report</artifactId>
+      <version>${wss.agents.version}</version>
+    </dependency>
     <!-- Atlassian -->
     <dependency>
       <groupId>com.atlassian.bamboo</groupId>
