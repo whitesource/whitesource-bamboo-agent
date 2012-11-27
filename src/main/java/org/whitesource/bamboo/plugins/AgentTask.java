@@ -39,6 +39,8 @@ import org.whitesource.bamboo.agent.WssUtils;
 
 import com.atlassian.bamboo.build.logger.BuildLogger;
 import com.atlassian.bamboo.configuration.ConfigurationMap;
+import com.atlassian.bamboo.plan.artifact.ArtifactDefinitionContext;
+import com.atlassian.bamboo.plan.artifact.ArtifactDefinitionContextImpl;
 import com.atlassian.bamboo.task.TaskContext;
 import com.atlassian.bamboo.task.TaskException;
 import com.atlassian.bamboo.task.TaskResult;
@@ -176,13 +178,43 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
     {
         PolicyCheckReport report = new PolicyCheckReport(result, buildContext.getProjectName(),
                 buildContext.getBuildResultKey());
-        // @todo: report.generate() yields an exception 'Velocity is not initialized correctly', likely due to classpath
-        // conflicts, i.e. multiple Velocity versions on the classpath.
-        // File reportArchive = report.generate(buildDirectory, true);
-        // ArtifactDefinitionContext artifact = new ArtifactDefinitionContextImpl(reportArchive.getName(), false);
-        // artifact.setLocation(reportArchive.getParent());
-        // artifact.setCopyPattern(reportArchive.getName());
-        // buildContext.getArtifactContext().getDefinitionContexts().add(artifact);
+        /*
+         * NOTE: if used as is, report.generate() yields an exception 'Velocity is not initialized correctly' due to a
+         * difficult to debug classpath issue, where 'ResourceManagerImpl instanceof ResourceManager' surprisingly
+         * yields false, see https://github.com/whitesource/whitesource-bamboo-agent/issues/9 for details.
+         * 
+         * It turns out that Velocity isn't very OSGi friendly in the first place (despite being 'OSGi ready' since
+         * version 1.7, see https://issues.apache.org/jira/browse/VELOCITY-694), for examples see e.g.
+         * https://developer.atlassian.com/display/PLUGINFRAMEWORK/Troubleshooting+Velocity+in+OSGi and
+         * http://stackoverflow.com/a/11437049/45773.
+         * 
+         * Even worse seems to be the reflection based dynamic class loading in place, which matches the issues outline
+         * in http://wiki.eclipse.org/index.php/Context_Class_Loader_Enhancements#Problem_Description (another remotely
+         * related issue is http://wiki.osgi.org/wiki/Avoid_Classloader_Hacks#Assumption_of_Global_Class_Visibility).
+         * Fortunately the former provides an easy workaround for the single call at hand though, which is used here
+         * accordingly (see http://wiki.eclipse.org/index.php/Context_Class_Loader_Enhancements#Context_Class_Loader_2).
+         */
+        File reportArchive = null;
+        Thread thread = Thread.currentThread();
+        ClassLoader loader = thread.getContextClassLoader();
+        thread.setContextClassLoader(this.getClass().getClassLoader());
+        try
+        {
+            reportArchive = report.generate(buildDirectory, true);
+        }
+        finally
+        {
+            thread.setContextClassLoader(loader);
+        }
+
+        if (reportArchive != null)
+        {
+            ArtifactDefinitionContext artifact = new ArtifactDefinitionContextImpl();
+            artifact.setName(reportArchive.getName());
+            artifact.setCopyPattern(reportArchive.getName());
+            buildContext.getArtifactContext().getDefinitionContexts().add(artifact);
+            log.info(WssUtils.logMsg(LOG_COMPONENT, "Defined artifact " + artifact));
+        }
     }
 
     private void logUpdateResult(UpdateInventoryResult result, BuildLogger buildLogger)
