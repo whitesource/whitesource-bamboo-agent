@@ -20,11 +20,13 @@
     UTF-8</project.build.sourceEncoding>
     <bamboo.version>4.0</bamboo.version>
     <bamboo.data.version>3.2.2</bamboo.data.version>
-    <amps.version>3.11</amps.version>
+    <amps.version>4.0</amps.version>
+    <useFastdevCli>false</useFastdevCli>
     <atlassian.plugin.key>
     ${project.groupId}.${project.artifactId}</atlassian.plugin.key>
     <atlassian.plugin.directory>
     org/whitesource/bamboo/plugins</atlassian.plugin.directory>
+    <maven.version>2.0.4</maven.version>
     <wss.agents.version>1.2.1</wss.agents.version>
   </properties>
   <dependencies>
@@ -51,6 +53,12 @@
       <version>${bamboo.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-embedder</artifactId>
+      <version>${maven.version}</version>
+      <scope>provided</scope>
+    </dependency>
     <!-- Others -->
     <dependency>
       <groupId>commons-io</groupId>
@@ -60,7 +68,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.10</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
     <dependency>

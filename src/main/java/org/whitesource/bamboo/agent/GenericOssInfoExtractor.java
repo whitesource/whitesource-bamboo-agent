@@ -45,7 +45,6 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
     protected List<Pattern> includePatterns;
     protected List<Pattern> excludePatterns;
     protected java.io.File checkoutDirectory;
-    protected BuildLogger buildLogger;
 
     /**
      * Constructor
@@ -55,11 +54,10 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
     public GenericOssInfoExtractor(final String projectName, final String projectToken, final String includes,
             final String excludes, final java.io.File checkoutDirectory, final BuildLogger buildLogger)
     {
-        super(projectToken, includes, excludes);
+        super(projectToken, includes, excludes, buildLogger);
 
         this.projectName = projectName;
         this.checkoutDirectory = checkoutDirectory;
-        this.buildLogger = buildLogger;
 
         includePatterns = new ArrayList<Pattern>();
         for (String pattern : this.includes)

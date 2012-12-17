@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.whitesource.agent.api.model.AgentProjectInfo;
 import org.whitesource.agent.api.model.DependencyInfo;
 
+import com.atlassian.bamboo.build.logger.BuildLogger;
+
 /**
  * Base class for extractors of open source usage information;
  * 
@@ -35,17 +37,20 @@ public abstract class BaseOssInfoExtractor
     protected List<String> includes;
     protected List<String> excludes;
     protected final Logger log = LoggerFactory.getLogger(BaseOssInfoExtractor.class);
+    protected BuildLogger buildLogger;
 
     /**
      * Constructor
      * 
      * @param runner
      */
-    protected BaseOssInfoExtractor(final String projectToken, final String includes, final String excludes)
+    protected BaseOssInfoExtractor(final String projectToken, final String includes, final String excludes,
+            final BuildLogger buildLogger)
     {
         this.projectToken = projectToken;
         this.includes = WssUtils.splitParameters(includes);
         this.excludes = WssUtils.splitParameters(excludes);
+        this.buildLogger = buildLogger;
     }
 
     public abstract Collection<AgentProjectInfo> extract();

@@ -10,8 +10,19 @@
         <param name="vendor-logo">${atlassian.plugin.directory}/WhiteSourceVendorLogo.png</param>
     </plugin-info>
 
+
     <!-- internationalize your plugin -->
     <resource type="i18n" name="i18n" location="${atlassian.plugin.directory}/i18n"/>
+    <web-resource key="ws.agent.plugin.resources"
+                  name="White Source Agent Plugin Resources">
+      <resource type="download"
+                name="AgentTask.css"
+                location="${atlassian.plugin.directory}/AgentTask.css" />
+      <resource type="download"
+                name="AgentTask.js"
+                location="${atlassian.plugin.directory}/AgentTask.js" />
+      <context>atl.general</context>
+  </web-resource>
 
     <taskType name="White Source Agent" class="org.whitesource.bamboo.plugins.AgentTask" key="ws.agent">
       <description>Update White Source OSS inventory.</description>
