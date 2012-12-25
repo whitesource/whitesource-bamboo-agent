@@ -36,11 +36,6 @@ public class MavenParser
     protected Set<MavenProject> getModules(MavenProject mavenProject)
     {
         Set<MavenProject> modules = Sets.newHashSet();
-        final List<MavenProject> mavenModules = mavenProject.getModules();
-        if (mavenModules != null)
-        {
-            modules.addAll(mavenModules);
-        }
 
         // recursively add child modules
         for (Object module : mavenProject.getModules())
@@ -50,6 +45,7 @@ public class MavenParser
             try
             {
                 MavenProject project = mavenEmbedder.readProject(pom);
+                modules.add(project);
                 modules.addAll(getModules(project));
             }
             catch (ProjectBuildingException e)
