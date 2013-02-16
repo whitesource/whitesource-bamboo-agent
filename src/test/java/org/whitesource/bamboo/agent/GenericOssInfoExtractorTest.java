@@ -1,7 +1,6 @@
 package org.whitesource.bamboo.agent;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.io.File;
@@ -24,7 +23,7 @@ public class GenericOssInfoExtractorTest
     protected static final int NUM_ALL = 12; // REVIEW: maybe derive this number dynamically in setUp(), or maybe not?
     protected static final String PATTERN_WSS = "lib/wss*.jar";
     protected static final int NUM_WSS = 3;
-    protected static final String dependenciesMismatch = "Expected number of dependencies doesn't match actual one (%s vs. %s), have you added/removed any dependencies?";
+    protected static final String dependenciesMismatch = "Number of dependencies doesn't match, expected:<[%s]> but was:<[%s]> - have you added/removed any dependencies?";
 
     @Before
     public void setUp() throws Exception
@@ -36,7 +35,7 @@ public class GenericOssInfoExtractorTest
     @Test
     public void testExtractOssInfoIsDirectory()
     {
-        assertTrue(testDirectory.isDirectory());
+        assertThat(testDirectory).isDirectory();
     }
 
     @Test
@@ -45,9 +44,9 @@ public class GenericOssInfoExtractorTest
         BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(PROJECT_NAME, PROJECT_TOKEN, PATTERN_ALL,
                 PATTERN_NONE, testDirectory, buildLogger);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
-        assertEquals(1, projectInfos.size());
+        assertThat(projectInfos.size()).isEqualTo(1);
         int actual = projectInfos.iterator().next().getDependencies().size();
-        assertEquals(String.format(dependenciesMismatch, NUM_ALL, actual), NUM_ALL, actual);
+        assertThat(actual).overridingErrorMessage(dependenciesMismatch, NUM_ALL, actual).isEqualTo(NUM_ALL);
     }
 
     @Test
@@ -56,9 +55,9 @@ public class GenericOssInfoExtractorTest
         BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(PROJECT_NAME, PROJECT_TOKEN, PATTERN_WSS,
                 PATTERN_NONE, testDirectory, buildLogger);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
-        assertEquals(1, projectInfos.size());
+        assertThat(projectInfos.size()).isEqualTo(1);
         int actual = projectInfos.iterator().next().getDependencies().size();
-        assertEquals(String.format(dependenciesMismatch, NUM_WSS, actual), NUM_WSS, actual);
+        assertThat(actual).overridingErrorMessage(dependenciesMismatch, NUM_WSS, actual).isEqualTo(NUM_WSS);
     }
 
     @Test
@@ -67,8 +66,9 @@ public class GenericOssInfoExtractorTest
         BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(PROJECT_NAME, PROJECT_TOKEN, PATTERN_ALL,
                 PATTERN_WSS, testDirectory, buildLogger);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
-        assertEquals(1, projectInfos.size());
+        assertThat(projectInfos.size()).isEqualTo(1);
         int actual = projectInfos.iterator().next().getDependencies().size();
-        assertEquals(String.format(dependenciesMismatch, NUM_ALL - NUM_WSS, actual), NUM_ALL - NUM_WSS, actual);
+        assertThat(actual).overridingErrorMessage(dependenciesMismatch, NUM_ALL - NUM_WSS, actual).isEqualTo(
+                NUM_ALL - NUM_WSS);
     }
 }
