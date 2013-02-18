@@ -18,7 +18,7 @@
   <properties>
     <project.build.sourceEncoding>
     UTF-8</project.build.sourceEncoding>
-    <bamboo.version>4.0</bamboo.version>
+    <bamboo.version>4.3</bamboo.version>
     <bamboo.data.version>3.2.2</bamboo.data.version>
     <amps.version>4.1.4</amps.version>
     <useFastdevCli>false</useFastdevCli>
@@ -26,7 +26,7 @@
     ${project.groupId}.${project.artifactId}</atlassian.plugin.key>
     <atlassian.plugin.directory>
     org/whitesource/bamboo/plugins</atlassian.plugin.directory>
-    <maven.version>2.0.4</maven.version>
+    <maven.version>3.0.4</maven.version>
     <wss.agents.version>1.2.1</wss.agents.version>
   </properties>
   <dependencies>

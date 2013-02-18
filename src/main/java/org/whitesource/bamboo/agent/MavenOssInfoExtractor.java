@@ -24,11 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.embedder.MavenEmbedderException;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Exclusion;
+import org.apache.maven.model.Parent;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingException;
 import org.whitesource.agent.api.ChecksumUtils;
 import org.whitesource.agent.api.model.AgentProjectInfo;
 import org.whitesource.agent.api.model.Coordinates;
@@ -36,6 +35,7 @@ import org.whitesource.agent.api.model.DependencyInfo;
 import org.whitesource.agent.api.model.ExclusionInfo;
 
 import com.atlassian.bamboo.build.logger.BuildLogger;
+import com.atlassian.bamboo.maven.embedder.MavenEmbedderException;
 
 public class MavenOssInfoExtractor extends BaseOssInfoExtractor
 {
@@ -108,11 +108,6 @@ public class MavenOssInfoExtractor extends BaseOssInfoExtractor
             log.error("Maven dependencies processing failed: " + e.getMessage());
             throw new RuntimeException("Maven dependencies processing failed!", e);
         }
-        catch (ProjectBuildingException e)
-        {
-            log.error("Maven plan dependencies processing failed!" + e.getMessage());
-            throw new RuntimeException("Maven plan dependencies processing failed: ", e);
-        }
 
         return mavenParser;
     }
@@ -180,10 +175,11 @@ public class MavenOssInfoExtractor extends BaseOssInfoExtractor
         // project coordinates
         projectInfo.setCoordinates(extractCoordinates(project));
 
+        Parent parent = project.getModel().getParent();
         // parent coordinates
-        if (project.hasParent())
+        if (parent != null)
         {
-            projectInfo.setParentCoordinates(extractCoordinates(project.getParent()));
+            projectInfo.setParentCoordinates(extractParentCoordinates(parent));
         }
 
         // dependencies
@@ -220,6 +216,11 @@ public class MavenOssInfoExtractor extends BaseOssInfoExtractor
     private Coordinates extractCoordinates(MavenProject mavenProject)
     {
         return new Coordinates(mavenProject.getGroupId(), mavenProject.getArtifactId(), mavenProject.getVersion());
+    }
+
+    private Coordinates extractParentCoordinates(Parent parent)
+    {
+        return new Coordinates(parent.getGroupId(), parent.getArtifactId(), parent.getVersion());
     }
 
     private Map<Dependency, Artifact> createLookupTable(MavenProject project)
