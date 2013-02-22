@@ -35,7 +35,6 @@ import org.whitesource.agent.api.model.DependencyInfo;
 import org.whitesource.agent.api.model.ExclusionInfo;
 
 import com.atlassian.bamboo.build.logger.BuildLogger;
-import com.atlassian.bamboo.maven.embedder.MavenEmbedderException;
 
 public class MavenOssInfoExtractor extends BaseOssInfoExtractor
 {
@@ -97,17 +96,9 @@ public class MavenOssInfoExtractor extends BaseOssInfoExtractor
     {
         MavenParser mavenParser = new MavenParser();
 
-        try
-        {
-            File pom = new File(workingDirectory, MavenParser.DEFAULT_MAVEN_POM);
-            log.info("Parsing Maven POM " + pom.getPath());
-            mavenParser.parseProject(pom);
-        }
-        catch (MavenEmbedderException e)
-        {
-            log.error("Maven dependencies processing failed: " + e.getMessage());
-            throw new RuntimeException("Maven dependencies processing failed!", e);
-        }
+        File pom = new File(workingDirectory, MavenParser.DEFAULT_MAVEN_POM);
+        log.info("Parsing Maven POM " + pom.getPath());
+        mavenParser.parseProject(pom);
 
         return mavenParser;
     }

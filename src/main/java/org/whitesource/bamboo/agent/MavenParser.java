@@ -28,11 +28,19 @@ public class MavenParser
         mavenEmbedderService = new MavenEmbedderServiceImpl();
     }
 
-    public void parseProject(File file) throws MavenEmbedderException
+    public void parseProject(File file)
     {
-        MavenConfiguration mavenConfiguration = MavenConfiguration.builder().build();
-        ModelBuildingResult modelBuildingResult = mavenEmbedderService.buildModel(file, mavenConfiguration);
-        mavenProject = new MavenProject(modelBuildingResult.getEffectiveModel());
+        try
+        {
+            MavenConfiguration mavenConfiguration = MavenConfiguration.builder().build();
+            ModelBuildingResult modelBuildingResult = mavenEmbedderService.buildModel(file, mavenConfiguration);
+            mavenProject = new MavenProject(modelBuildingResult.getEffectiveModel());
+        }
+        catch (MavenEmbedderException e)
+        {
+            log.error("Maven dependencies processing failed: " + e.getMessage());
+            throw new RuntimeException("Maven dependencies processing failed!", e);
+        }
     }
 
     protected Set<MavenProject> getModules(MavenProject mavenProject)
