@@ -172,7 +172,7 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
             BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(projectName,
                     configurationMap.get(AgentTaskConfigurator.PROJECT_TOKEN),
                     configurationMap.get(AgentTaskConfigurator.FILES_INCLUDE_PATTERN),
-                    configurationMap.get(AgentTaskConfigurator.FILES_EXCLUDE_PATTERN), rootDirectory, buildLogger);
+                    configurationMap.get(AgentTaskConfigurator.FILES_EXCLUDE_PATTERN), rootDirectory);
             projectInfos = extractor.extract();
         }
         else if (AgentTaskConfigurator.MAVEN_TYPE.equals(projectType))
@@ -185,8 +185,7 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
                     configurationMap.get(AgentTaskConfigurator.MODULE_TOKENS),
                     configurationMap.get(AgentTaskConfigurator.MODULES_INCLUDE_PATTERN),
                     configurationMap.get(AgentTaskConfigurator.MODULES_EXCLUDE_PATTERN),
-                    configurationMap.getAsBoolean(AgentTaskConfigurator.IGNORE_POM), taskContext.getWorkingDirectory(),
-                    buildLogger);
+                    configurationMap.getAsBoolean(AgentTaskConfigurator.IGNORE_POM), taskContext.getWorkingDirectory());
             projectInfos = extractor.extract();
         }
         else

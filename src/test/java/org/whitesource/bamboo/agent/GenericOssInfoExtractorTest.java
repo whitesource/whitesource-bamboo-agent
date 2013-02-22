@@ -1,7 +1,6 @@
 package org.whitesource.bamboo.agent;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.util.Collection;
@@ -10,11 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.whitesource.agent.api.model.AgentProjectInfo;
 
-import com.atlassian.bamboo.build.logger.BuildLogger;
-
 public class GenericOssInfoExtractorTest
 {
-    private static BuildLogger buildLogger;
     private static File testDirectory;
     protected static final String PROJECT_NAME = "TestPojectName";
     protected static final String PROJECT_TOKEN = "TestProjectToken";
@@ -28,7 +24,6 @@ public class GenericOssInfoExtractorTest
     @Before
     public void setUp() throws Exception
     {
-        buildLogger = mock(BuildLogger.class);
         testDirectory = new File("target/test-jars");
     }
 
@@ -42,7 +37,7 @@ public class GenericOssInfoExtractorTest
     public void testExtractOssInfoDefault()
     {
         BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(PROJECT_NAME, PROJECT_TOKEN, PATTERN_ALL,
-                PATTERN_NONE, testDirectory, buildLogger);
+                PATTERN_NONE, testDirectory);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
         assertThat(projectInfos.size()).isEqualTo(1);
         int actual = projectInfos.iterator().next().getDependencies().size();
@@ -53,7 +48,7 @@ public class GenericOssInfoExtractorTest
     public void testExtractOssInfoDefaultWithIncludes()
     {
         BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(PROJECT_NAME, PROJECT_TOKEN, PATTERN_WSS,
-                PATTERN_NONE, testDirectory, buildLogger);
+                PATTERN_NONE, testDirectory);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
         assertThat(projectInfos.size()).isEqualTo(1);
         int actual = projectInfos.iterator().next().getDependencies().size();
@@ -64,7 +59,7 @@ public class GenericOssInfoExtractorTest
     public void testExtractOssInfoDefaultWithExcludes()
     {
         BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(PROJECT_NAME, PROJECT_TOKEN, PATTERN_ALL,
-                PATTERN_WSS, testDirectory, buildLogger);
+                PATTERN_WSS, testDirectory);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
         assertThat(projectInfos.size()).isEqualTo(1);
         int actual = projectInfos.iterator().next().getDependencies().size();

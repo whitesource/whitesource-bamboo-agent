@@ -1,7 +1,6 @@
 package org.whitesource.bamboo.agent;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.util.Collection;
@@ -11,11 +10,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.whitesource.agent.api.model.AgentProjectInfo;
 
-import com.atlassian.bamboo.build.logger.BuildLogger;
-
 public class MavenOssInfoExtractorTest
 {
-    private static BuildLogger buildLogger;
     private static File testDirectory;
     protected static final String PROJECT_TOKEN = "TestProjectToken";
     protected static final String MODULE_TOKENS_EMPTY = "";
@@ -28,7 +24,6 @@ public class MavenOssInfoExtractorTest
     @Before
     public void setUp() throws Exception
     {
-        buildLogger = mock(BuildLogger.class);
         testDirectory = new File(".");
     }
 
@@ -42,7 +37,7 @@ public class MavenOssInfoExtractorTest
     public void testExtractOssInfoDefault()
     {
         BaseOssInfoExtractor extractor = new MavenOssInfoExtractor(PROJECT_TOKEN, MODULE_TOKENS_EMPTY, PATTERN_NONE,
-                PATTERN_NONE, false, testDirectory, buildLogger);
+                PATTERN_NONE, false, testDirectory);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
         assertThat(projectInfos.size()).isEqualTo(1);
         int actual = projectInfos.iterator().next().getDependencies().size();
@@ -54,7 +49,7 @@ public class MavenOssInfoExtractorTest
     public void testExtractOssInfoDefaultWithIncludes()
     {
         BaseOssInfoExtractor extractor = new MavenOssInfoExtractor(PROJECT_TOKEN, MODULE_TOKENS_EMPTY, PATTERN_WSS,
-                PATTERN_NONE, false, testDirectory, buildLogger);
+                PATTERN_NONE, false, testDirectory);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
         assertThat(projectInfos.size()).isEqualTo(1);
         int actual = projectInfos.iterator().next().getDependencies().size();
@@ -66,7 +61,7 @@ public class MavenOssInfoExtractorTest
     public void testExtractOssInfoDefaultWithExcludes()
     {
         BaseOssInfoExtractor extractor = new MavenOssInfoExtractor(PROJECT_TOKEN, MODULE_TOKENS_EMPTY, PATTERN_NONE,
-                PATTERN_WSS, false, testDirectory, buildLogger);
+                PATTERN_WSS, false, testDirectory);
         Collection<AgentProjectInfo> projectInfos = extractor.extract();
         assertThat(projectInfos.size()).isEqualTo(1);
         int actual = projectInfos.iterator().next().getDependencies().size();

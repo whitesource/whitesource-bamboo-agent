@@ -19,6 +19,7 @@ import com.google.common.collect.Sets;
 public class MavenParser
 {
     private static final Logger log = Logger.getLogger(MavenParser.class);
+    private static final String LOG_COMPONENT = "MavenParser";
     public static final String DEFAULT_MAVEN_POM = "pom.xml";
     private MavenEmbedderService mavenEmbedderService;
     private MavenProject mavenProject;
@@ -38,7 +39,7 @@ public class MavenParser
         }
         catch (MavenEmbedderException e)
         {
-            log.error("Maven dependencies processing failed: " + e.getMessage());
+            log.error(WssUtils.logMsg(LOG_COMPONENT, "Maven dependencies processing failed: " + e.getMessage()));
             throw new RuntimeException("Maven dependencies processing failed!", e);
         }
     }
@@ -63,7 +64,7 @@ public class MavenParser
             }
             catch (MavenEmbedderException e)
             {
-                log.warn("Can't read POM for module " + module, e);
+                log.warn(WssUtils.logMsg(LOG_COMPONENT, "Can't read POM for module " + module + ": " + e.getMessage()));
             }
         }
 

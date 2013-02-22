@@ -30,8 +30,6 @@ import org.whitesource.agent.api.model.AgentProjectInfo;
 import org.whitesource.agent.api.model.Coordinates;
 import org.whitesource.agent.api.model.DependencyInfo;
 
-import com.atlassian.bamboo.build.logger.BuildLogger;
-
 /**
  * Concrete implementation for generic job types. Based on user entered locations of open source libraries.
  * 
@@ -52,9 +50,9 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
      * @param runner
      */
     public GenericOssInfoExtractor(final String projectName, final String projectToken, final String includes,
-            final String excludes, final java.io.File checkoutDirectory, final BuildLogger buildLogger)
+            final String excludes, final java.io.File checkoutDirectory)
     {
-        super(projectToken, includes, excludes, buildLogger);
+        super(projectToken, includes, excludes);
 
         this.projectName = projectName;
         this.checkoutDirectory = checkoutDirectory;
@@ -89,21 +87,11 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
         if (includePatterns.isEmpty())
         {
             log.error(WssUtils.logMsg(LOG_COMPONENT, "No include patterns defined. Failing."));
-            buildLogger.addErrorLogEntry("No include patterns defined. Can't look for open source information.");
         }
         else
         {
-            buildLogger.addBuildLogEntry("Including files matching:");
-            buildLogger.addBuildLogEntry(StringUtils.join(includes, "\r"));
-            if (excludes.isEmpty())
-            {
-                buildLogger.addBuildLogEntry("Excluding none.");
-            }
-            else
-            {
-                buildLogger.addBuildLogEntry("Excluding files matching:");
-                buildLogger.addBuildLogEntry(StringUtils.join(excludes, "\r"));
-            }
+            log.info(WssUtils.logMsg(LOG_COMPONENT, "Including files matching:\r" + StringUtils.join(includes, "\r")));
+            log.info(WssUtils.logMsg(LOG_COMPONENT, "Exluding files matching:\r" + StringUtils.join(excludes, "\r")));
 
             extractOssInfo(checkoutDirectory, projectInfo.getDependencies());
         }
@@ -170,29 +158,27 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
 
     private DependencyInfo extractDepependencyInfo(File file)
     {
-        DependencyInfo info = new DependencyInfo();
+        DependencyInfo dependencyInfo = new DependencyInfo();
 
-        info.setSystemPath(file.getAbsolutePath());
-        info.setArtifactId(file.getName());
+        dependencyInfo.setSystemPath(file.getAbsolutePath());
+        dependencyInfo.setArtifactId(file.getName());
 
         try
         {
-            info.setSha1(ChecksumUtils.calculateSHA1(file));
+            dependencyInfo.setSha1(ChecksumUtils.calculateSHA1(file));
         }
         catch (IOException e)
         {
-            String msg = "Error calculating SHA-1 for " + file.getAbsolutePath();
-            log.warn(WssUtils.logMsg(LOG_COMPONENT, msg));
-            buildLogger.addBuildLogEntry(msg);
+            log.warn(WssUtils.logMsg(LOG_COMPONENT, ERROR_SHA1 + "for " + file.getAbsolutePath()));
         }
 
-        return info;
+        return dependencyInfo;
     }
 
     // NOTE: derived from http://stackoverflow.com/a/1248627/45773.
     private String convertGlobToRegEx(String line)
     {
-        log.debug("Input glob expression: " + line);
+        log.debug(WssUtils.logMsg(LOG_COMPONENT, "Input glob expression: " + line));
         line = line.trim();
         int strLen = line.length();
         StringBuilder sb = new StringBuilder(strLen);
@@ -289,7 +275,13 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
             }
         }
 
-        log.debug("Output regular expression: " + sb.toString());
+        log.debug(WssUtils.logMsg(LOG_COMPONENT, "Output regular expression: " + sb.toString()));
         return sb.toString();
+    }
+
+    @Override
+    protected String getLogComponent()
+    {
+        return LOG_COMPONENT;
     }
 }

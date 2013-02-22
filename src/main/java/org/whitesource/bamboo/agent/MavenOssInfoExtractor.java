@@ -34,11 +34,8 @@ import org.whitesource.agent.api.model.Coordinates;
 import org.whitesource.agent.api.model.DependencyInfo;
 import org.whitesource.agent.api.model.ExclusionInfo;
 
-import com.atlassian.bamboo.build.logger.BuildLogger;
-
 public class MavenOssInfoExtractor extends BaseOssInfoExtractor
 {
-    public static final String ERROR_SHA1 = "Error calculating SHA-1";
     private static final String LOG_COMPONENT = "MavenExtractor";
 
     protected Map<String, String> moduleTokens;
@@ -52,10 +49,9 @@ public class MavenOssInfoExtractor extends BaseOssInfoExtractor
      * @param runner
      */
     public MavenOssInfoExtractor(final String projectToken, final String moduleTokens, final String includes,
-            final String excludes, final boolean ignorePomModules, final java.io.File checkoutDirectory,
-            final BuildLogger buildLogger)
+            final String excludes, final boolean ignorePomModules, final java.io.File checkoutDirectory)
     {
-        super(projectToken, includes, excludes, buildLogger);
+        super(projectToken, includes, excludes);
 
         this.ignorePomModules = ignorePomModules;
         this.moduleTokens = WssUtils.splitParametersMap(moduleTokens);
@@ -84,7 +80,7 @@ public class MavenOssInfoExtractor extends BaseOssInfoExtractor
             }
             else
             {
-                log.info("skipping " + project.getId());
+                log.info(WssUtils.logMsg(LOG_COMPONENT, "skipping " + project.getId()));
             }
         }
         logAgentProjectInfos(projectInfos);
@@ -97,7 +93,7 @@ public class MavenOssInfoExtractor extends BaseOssInfoExtractor
         MavenParser mavenParser = new MavenParser();
 
         File pom = new File(workingDirectory, MavenParser.DEFAULT_MAVEN_POM);
-        log.info("Parsing Maven POM " + pom.getPath());
+        log.info(WssUtils.logMsg(LOG_COMPONENT, "Parsing Maven POM " + pom.getPath()));
         mavenParser.parseProject(pom);
 
         return mavenParser;
@@ -149,7 +145,7 @@ public class MavenOssInfoExtractor extends BaseOssInfoExtractor
     {
         long startTime = System.currentTimeMillis();
 
-        log.info("processing " + project.getId());
+        log.info(WssUtils.logMsg(LOG_COMPONENT, "processing Maven project " + project.getId()));
 
         AgentProjectInfo projectInfo = new AgentProjectInfo();
 
@@ -191,7 +187,7 @@ public class MavenOssInfoExtractor extends BaseOssInfoExtractor
                     }
                     catch (IOException e)
                     {
-                        log.debug(ERROR_SHA1 + " for " + artifact.getId());
+                        log.warn(WssUtils.logMsg(LOG_COMPONENT, ERROR_SHA1 + " for " + artifact.getId()));
                     }
                 }
             }
@@ -199,7 +195,8 @@ public class MavenOssInfoExtractor extends BaseOssInfoExtractor
             projectInfo.getDependencies().add(dependencyInfo);
         }
 
-        log.info("Total processing time is " + (System.currentTimeMillis() - startTime) + " [msec]");
+        log.info(WssUtils.logMsg(LOG_COMPONENT, "Total Maven project processing time is "
+                + (System.currentTimeMillis() - startTime) + " [msec]"));
 
         return projectInfo;
     }
@@ -289,5 +286,11 @@ public class MavenOssInfoExtractor extends BaseOssInfoExtractor
         }
 
         return info;
+    }
+
+    @Override
+    protected String getLogComponent()
+    {
+        return LOG_COMPONENT;
     }
 }
