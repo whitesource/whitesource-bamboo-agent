@@ -1,4 +1,4 @@
-package org.whitesource.bamboo.agent;
+package ut.org.whitesource.bamboo.agent;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -8,6 +8,8 @@ import java.util.Collection;
 import org.junit.Before;
 import org.junit.Test;
 import org.whitesource.agent.api.model.AgentProjectInfo;
+import org.whitesource.bamboo.agent.BaseOssInfoExtractor;
+import org.whitesource.bamboo.agent.GenericOssInfoExtractor;
 
 public class GenericOssInfoExtractorTest
 {
@@ -16,7 +18,7 @@ public class GenericOssInfoExtractorTest
     protected static final String PROJECT_TOKEN = "TestProjectToken";
     protected static final String PATTERN_NONE = "";
     protected static final String PATTERN_ALL = "lib/*.jar";
-    protected static final int NUM_ALL = 9; // REVIEW: maybe derive this number dynamically in setUp(), or maybe not?
+    protected static final int NUM_ALL = 12; // REVIEW: maybe derive this number dynamically in setUp(), or maybe not?
     protected static final String PATTERN_WSS = "lib/wss*.jar";
     protected static final int NUM_WSS = 3;
     protected static final String dependenciesMismatch = "Number of dependencies doesn't match, expected:<[%s]> but was:<[%s]> - have you added/removed any dependencies?";

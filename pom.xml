@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.whitesource.bamboo.plugins</groupId>
   <artifactId>whitesource-bamboo-agent</artifactId>
-  <version>1.0.0</version>
+  <version>1.0-SNAPSHOT</version>
   <organization>
     <name>WhiteSource Software Ltd.</name>
     <url>http://www.whitesourcesoftware.com/</url>
@@ -21,7 +21,8 @@
     <bamboo.version>4.3</bamboo.version>
     <bamboo.data.version>3.2.2</bamboo.data.version>
     <amps.version>4.1.4</amps.version>
-    <useFastdevCli>false</useFastdevCli>
+    <useFastdevCli>true</useFastdevCli>
+    <plugin.testrunner.version>1.1</plugin.testrunner.version>
     <atlassian.plugin.key>
     ${project.groupId}.${project.artifactId}</atlassian.plugin.key>
     <atlassian.plugin.directory>
@@ -59,6 +60,24 @@
       <version>${maven.version}</version>
       <scope>provided</scope>
     </dependency>
+    <!-- WIRED TEST RUNNER DEPENDENCIES -->
+    <dependency>
+      <groupId>com.atlassian.plugins</groupId>
+      <artifactId>atlassian-plugins-osgi-testrunner</artifactId>
+      <version>${plugin.testrunner.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+      <version>1.1.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.2.2-atlassian-1</version>
+    </dependency>
     <!-- Others -->
     <dependency>
       <groupId>commons-io</groupId>
@@ -93,8 +112,7 @@
         <extensions>true</extensions>
         <configuration>
           <productVersion>${bamboo.version}</productVersion>
-          <productDataVersion>
-          ${bamboo.data.version}</productDataVersion>
+          <productDataVersion>${bamboo.data.version}</productDataVersion>
           <!-- <productDataPath>${basedir}/src/test/resources/generated-test-resources.zip</productDataPath> -->
         </configuration>
       </plugin>
