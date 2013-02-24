@@ -1,7 +1,6 @@
 package org.whitesource.bamboo.plugins;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.fest.assertions.api.Assertions.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,9 +24,9 @@ public class AgentTaskConfiguratorTest extends TestCase
     public void testProjectTokenIsNull()
     {
         final Map<String, Object> context = new HashMap<String, Object>();
-        assertTrue(context.isEmpty());
+        assertThat(context).isEmpty();
         configurator.populateContextForCreate(context);
         final String token = (String) context.get(AgentTaskConfigurator.PROJECT_TOKEN);
-        assertThat(token, equalTo(null));
+        assertThat(token).isNull();
     }
 }

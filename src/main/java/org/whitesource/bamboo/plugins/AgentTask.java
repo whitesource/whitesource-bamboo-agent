@@ -35,6 +35,7 @@ import org.whitesource.agent.client.WssServiceException;
 import org.whitesource.agent.report.PolicyCheckReport;
 import org.whitesource.bamboo.agent.BaseOssInfoExtractor;
 import org.whitesource.bamboo.agent.GenericOssInfoExtractor;
+import org.whitesource.bamboo.agent.MavenOssInfoExtractor;
 import org.whitesource.bamboo.agent.WssUtils;
 
 import com.atlassian.bamboo.build.logger.BuildLogger;
@@ -52,6 +53,7 @@ import com.atlassian.bamboo.variable.CustomVariableContextImpl;
 public class AgentTask extends CustomVariableContextImpl implements TaskType
 {
     private static final String LOG_COMPONENT = "AgentTask";
+    private static final String CONTACT_SUPPORT = "Encountered internal plugin error - please contact support!";
 
     protected final Logger log = LoggerFactory.getLogger(BaseOssInfoExtractor.class);
 
@@ -66,7 +68,8 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
         validateVariableSubstitution(buildLogger, taskResultBuilder, configurationMap);
 
         Collection<AgentProjectInfo> projectInfos = collectOssUsageInformation(buildLogger, configurationMap,
-                taskContext.getBuildContext().getProjectName(), taskContext.getRootDirectory());
+                taskContext.getBuildContext().getProjectName(), taskContext.getRootDirectory(), taskContext,
+                taskResultBuilder);
 
         updateOssInventory(buildLogger, taskResultBuilder, configurationMap, taskContext.getBuildContext(),
                 taskContext.getRootDirectory(), projectInfos);
@@ -155,15 +158,41 @@ public class AgentTask extends CustomVariableContextImpl implements TaskType
     }
 
     private Collection<AgentProjectInfo> collectOssUsageInformation(final BuildLogger buildLogger,
-            final Map<String, String> configurationMap, final String projectName, final java.io.File rootDirectory)
+            final ConfigurationMap configurationMap, final String projectName, final java.io.File rootDirectory,
+            TaskContext taskContext, TaskResultBuilder taskResultBuilder)
     {
-        buildLogger.addBuildLogEntry("Collecting OSS usage information");
-        // REVIEW: the naming concerning 'includes' vs. 'includesPattern' is confusing down the call stack!
-        BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(projectName,
-                configurationMap.get(AgentTaskConfigurator.PROJECT_TOKEN),
-                configurationMap.get(AgentTaskConfigurator.INCLUDES_PATTERN),
-                configurationMap.get(AgentTaskConfigurator.EXCLUDES_PATTERN), rootDirectory, buildLogger);
-        Collection<AgentProjectInfo> projectInfos = extractor.extract();
+        final String projectType = configurationMap.get(AgentTaskConfigurator.PROJECT_TYPE);
+
+        Collection<AgentProjectInfo> projectInfos = null;
+        if (AgentTaskConfigurator.GENERIC_TYPE.equals(projectType))
+        {
+            buildLogger.addBuildLogEntry("Collecting OSS usage information (Freestyle)");
+
+            // REVIEW: the naming concerning 'includes' vs. 'includesPattern' is confusing down the call stack!
+            BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(projectName,
+                    configurationMap.get(AgentTaskConfigurator.PROJECT_TOKEN),
+                    configurationMap.get(AgentTaskConfigurator.FILES_INCLUDE_PATTERN),
+                    configurationMap.get(AgentTaskConfigurator.FILES_EXCLUDE_PATTERN), rootDirectory);
+            projectInfos = extractor.extract();
+        }
+        else if (AgentTaskConfigurator.MAVEN_TYPE.equals(projectType))
+        {
+            buildLogger.addBuildLogEntry("Collecting OSS usage information (Maven)");
+
+            // REVIEW: the naming concerning 'includes' vs. 'includesPattern' is confusing down the call stack!
+            BaseOssInfoExtractor extractor = new MavenOssInfoExtractor(
+                    configurationMap.get(AgentTaskConfigurator.PROJECT_TOKEN),
+                    configurationMap.get(AgentTaskConfigurator.MODULE_TOKENS),
+                    configurationMap.get(AgentTaskConfigurator.MODULES_INCLUDE_PATTERN),
+                    configurationMap.get(AgentTaskConfigurator.MODULES_EXCLUDE_PATTERN),
+                    configurationMap.getAsBoolean(AgentTaskConfigurator.IGNORE_POM), taskContext.getWorkingDirectory());
+            projectInfos = extractor.extract();
+        }
+        else
+        {
+            buildLogger.addErrorLogEntry(CONTACT_SUPPORT);
+            taskResultBuilder.failedWithError();
+        }
 
         return projectInfos;
     }

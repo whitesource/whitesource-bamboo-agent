@@ -10,10 +10,21 @@
         <param name="vendor-logo">${atlassian.plugin.directory}/WhiteSourceVendorLogo.png</param>
     </plugin-info>
 
-    <!-- internationalize your plugin -->
+    <!-- add i18n resource -->
     <resource type="i18n" name="i18n" location="${atlassian.plugin.directory}/i18n"/>
 
-    <taskType name="White Source Agent" class="org.whitesource.bamboo.plugins.AgentTask" key="ws.agent">
+    <!-- add web resources -->
+    <web-resource key="agent-web-resources" name="White Source Agent Web Resources">
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+
+        <resource type="download" name="AgentTask.css" location="${atlassian.plugin.directory}/AgentTask.css" />
+        <resource type="download" name="AgentTask.js" location="${atlassian.plugin.directory}/AgentTask.js" />
+
+        <context>whitesource-bamboo-agent</context>
+  </web-resource>
+
+    <!-- publish components -->
+    <taskType key="agentTask" name="White Source Agent" class="org.whitesource.bamboo.plugins.AgentTask">
       <description>Update White Source OSS inventory.</description>
       <category name="deployment" />
       <category name="test" />
@@ -21,4 +32,8 @@
       <resource type="download" name="icon" location="${atlassian.plugin.directory}/AgentTaskIcon.png" />
       <resource type="freemarker" name="edit" location="${atlassian.plugin.directory}/editAgentTask.ftl"/>
     </taskType>
+
+    <!-- import from product container -->
+    <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties" />
+    
 </atlassian-plugin>

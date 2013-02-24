@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.whitesource.bamboo.plugins</groupId>
   <artifactId>whitesource-bamboo-agent</artifactId>
-  <version>1.0.0</version>
+  <version>1.0-SNAPSHOT</version>
   <organization>
     <name>WhiteSource Software Ltd.</name>
     <url>http://www.whitesourcesoftware.com/</url>
@@ -18,13 +18,16 @@
   <properties>
     <project.build.sourceEncoding>
     UTF-8</project.build.sourceEncoding>
-    <bamboo.version>4.0</bamboo.version>
+    <bamboo.version>4.3</bamboo.version>
     <bamboo.data.version>3.2.2</bamboo.data.version>
-    <amps.version>3.11</amps.version>
+    <amps.version>4.1.4</amps.version>
+    <useFastdevCli>true</useFastdevCli>
+    <plugin.testrunner.version>1.1</plugin.testrunner.version>
     <atlassian.plugin.key>
     ${project.groupId}.${project.artifactId}</atlassian.plugin.key>
     <atlassian.plugin.directory>
     org/whitesource/bamboo/plugins</atlassian.plugin.directory>
+    <maven.version>3.0.4</maven.version>
     <wss.agents.version>1.2.1</wss.agents.version>
   </properties>
   <dependencies>
@@ -51,6 +54,30 @@
       <version>${bamboo.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-embedder</artifactId>
+      <version>${maven.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <!-- WIRED TEST RUNNER DEPENDENCIES -->
+    <dependency>
+      <groupId>com.atlassian.plugins</groupId>
+      <artifactId>atlassian-plugins-osgi-testrunner</artifactId>
+      <version>${plugin.testrunner.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+      <version>1.1.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.2.2-atlassian-1</version>
+    </dependency>
     <!-- Others -->
     <dependency>
       <groupId>commons-io</groupId>
@@ -60,13 +87,19 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.10</version>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
-      <version>1.9.0</version>
+      <version>1.9.5</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.easytesting</groupId>
+      <artifactId>fest-assert-core</artifactId>
+      <version>2.0M8</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -79,8 +112,7 @@
         <extensions>true</extensions>
         <configuration>
           <productVersion>${bamboo.version}</productVersion>
-          <productDataVersion>
-          ${bamboo.data.version}</productDataVersion>
+          <productDataVersion>${bamboo.data.version}</productDataVersion>
           <!-- <productDataPath>${basedir}/src/test/resources/generated-test-resources.zip</productDataPath> -->
         </configuration>
       </plugin>
@@ -91,6 +123,24 @@
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/test-jars/lib</outputDirectory>
+              <excludeTransitive>true</excludeTransitive>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
