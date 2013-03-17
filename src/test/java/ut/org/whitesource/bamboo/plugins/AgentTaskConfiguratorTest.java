@@ -1,4 +1,4 @@
-package org.whitesource.bamboo.plugins;
+package ut.org.whitesource.bamboo.plugins;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -8,6 +8,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.junit.Test;
+import org.whitesource.bamboo.plugins.AgentTaskConfigurator;
 
 public class AgentTaskConfiguratorTest extends TestCase
 {

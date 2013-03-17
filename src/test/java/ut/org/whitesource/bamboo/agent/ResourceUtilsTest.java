@@ -1,9 +1,10 @@
-package org.whitesource.bamboo.agent;
+package ut.org.whitesource.bamboo.agent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+import org.whitesource.bamboo.agent.ResourceUtils;
 import org.whitesource.bamboo.agent.ResourceUtils.PathResolutionException;
 
 /**
