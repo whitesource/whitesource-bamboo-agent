@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.whitesource</groupId>
+	<artifactId>whitesource-bamboo-plugin</artifactId>
+	<version>2.0.0-SNAPSHOT</version>
+
+	<organization>
+		<name>WhiteSource Software Ltd.</name>
+		<url>http://www.whitesourcesoftware.com/</url>
+	</organization>
+	<name>White Source agent for Bamboo</name>
+	<description>White Source external update agent for Atlassian Bamboo.</description>
+	<packaging>atlassian-plugin</packaging>
+	<developers>
+        <developer>
+            <id>gangadhar</id>
+            <name>Gangadhar M</name>
+            <email>mailme.m.gangadhar@gmail.com</email>
+        </developer>
+    </developers>
+	<properties>
+		<bamboo.version>5.11.1</bamboo.version>
+		<bamboo.data.version>5.11.1</bamboo.data.version>
+		<!-- <bamboo.version>5.10.3</bamboo.version> -->
+		<!-- <bamboo.data.version>5.10.3</bamboo.data.version> -->
+		<amps.version>6.2.1</amps.version>
+		<plugin.testrunner.version>1.2.3</plugin.testrunner.version>
+		<atlassian.spring.scanner.version>1.2.6</atlassian.spring.scanner.version>
+		<!-- This key is used to keep the consistency between the key in atlassian-plugin.xml 
+			and the key to generate bundle. -->
+		<atlassian.plugin.key>${project.groupId}.${project.artifactId}</atlassian.plugin.key>
+		<wss.agents.version>1.2.1</wss.agents.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+            <groupId>com.atlassian.bamboo</groupId>
+            <artifactId>atlassian-bamboo-api</artifactId>
+            <version>${bamboo.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.tek42.perforce</groupId>
+                    <artifactId>p4java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.atlassian.bamboo</groupId>
+            <artifactId>atlassian-bamboo-core</artifactId>
+            <version>${bamboo.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.tek42.perforce</groupId>
+                    <artifactId>p4java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+		<dependency>
+			<groupId>com.atlassian.bamboo</groupId>
+			<artifactId>atlassian-bamboo-web</artifactId>
+			<version>${bamboo.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>jsr311-api</artifactId>
+			<version>1.1.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.2.2-atlassian-1</version>
+		</dependency>
+
+		<!-- white source Http Api -->
+	 	<dependency>
+	      <groupId>org.whitesource</groupId>
+	      <artifactId>wss-agent-api</artifactId>
+	      <version>${wss.agents.version}</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.whitesource</groupId>
+	      <artifactId>wss-agent-api-client</artifactId>
+	      <version>${wss.agents.version}</version>
+	    </dependency>
+	    <dependency>
+	      <groupId>org.whitesource</groupId>
+	      <artifactId>wss-agent-report</artifactId>
+	      <version>${wss.agents.version}</version>
+	    </dependency>
+		<!-- white source Http Api -->
+	</dependencies>
+
+	<build>
+		<plugins>
+		 	<plugin>
+                <groupId>com.atlassian.maven.plugins</groupId>
+                <artifactId>maven-bamboo-plugin</artifactId>
+                <version>${amps.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <productVersion>${bamboo.version}</productVersion>
+                </configuration>
+            </plugin>
+		</plugins>
+	</build>
+</project>

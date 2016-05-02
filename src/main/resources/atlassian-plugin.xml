@@ -1,0 +1,39 @@
+<atlassian-plugin key="${atlassian.plugin.key}" name="${project.name}" plugins-version="2">
+    <plugin-info>
+        <description>${project.description}</description>
+        <version>${project.version}</version>
+        <vendor name="${project.organization.name}" url="${project.organization.url}" />
+        <param name="plugin-icon">images/WhiteSourcePluginIcon.png</param>
+        <param name="plugin-logo">images/WhiteSourcePluginLogo.png</param>
+    </plugin-info>
+
+    <!-- add our i18n resource -->
+    <resource type="i18n" name="i18n" location="whitesource-bamboo-plugin"/>
+    
+    <!-- add our web resources -->
+    <web-resource key="whitesource-bamboo-plugin-resources" name="whitesource-bamboo-plugin Web Resources">
+        <dependency>com.atlassian.auiplugin:ajs</dependency>
+        
+        <resource type="download" name="whitesource-bamboo-plugin.css" location="/css/whitesource-bamboo-plugin.css"/>
+        <resource type="download" name="whitesource-bamboo-plugin.js" location="/js/whitesource-bamboo-plugin.js"/>
+        <resource type="download" name="images/" location="/images"/>
+        <resource type="download" name="ftl/" location="/ftl"/>
+
+        <context>whitesource-bamboo-plugin</context>
+    </web-resource>
+    
+    <!-- publish components -->
+    <taskType key="agentTask" name="White Source Agent" class="org.whitesource.bamboo.plugin.task.AgentTask">
+      <description>Update White Source OSS inventory.</description>
+      <category name="deployment" />
+      <category name="test" />
+      <configuration class="org.whitesource.bamboo.plugin.task.AgentTaskConfigurator"/>
+     <!--  <resource type="download" name="icon" location="${atlassian.plugin.directory}/AgentTaskIcon.png" /> -->
+      <resource type="download" name="icon" location="images/AgentTaskIcon.png" />
+      <resource type="freemarker" name="edit" location="ftl/editAgentTask.ftl"/>
+    </taskType>
+    
+	<component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties"/>
+  	<component-import key="i18nResolver" interface="com.atlassian.sal.api.message.I18nResolver"/>
+    
+</atlassian-plugin>
