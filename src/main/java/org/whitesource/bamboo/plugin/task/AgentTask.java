@@ -16,10 +16,11 @@ import static org.whitesource.bamboo.plugin.Constants.MODULES_EXCLUDE_PATTERN;
 import static org.whitesource.bamboo.plugin.Constants.MODULES_INCLUDE_PATTERN;
 import static org.whitesource.bamboo.plugin.Constants.MODULE_TOKENS;
 import static org.whitesource.bamboo.plugin.Constants.PARAM_LIST_SPLIT_PATTERN;
+import static org.whitesource.bamboo.plugin.Constants.PRODUCT_TOKEN;
 import static org.whitesource.bamboo.plugin.Constants.PROJECT_TOKEN;
 import static org.whitesource.bamboo.plugin.Constants.PROJECT_TYPE;
 import static org.whitesource.bamboo.plugin.Constants.SEARCH_BUILD_SUCCESS_FAIL_MESSAGE_EVERYWHERE;
-import static org.whitesource.bamboo.plugin.Constants.*;
+import static org.whitesource.bamboo.plugin.Constants.SERVICE_URL_KEYWORD;
 
 import java.io.File;
 import java.io.IOException;

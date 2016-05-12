@@ -61,9 +61,12 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor
         AgentProjectInfo projectInfo = new AgentProjectInfo();
         projectInfos.add(projectInfo);
 
-        projectInfo.setCoordinates(new Coordinates(null, projectName, null));
-        projectInfo.setProjectToken(projectToken);
-
+        if(StringUtils.isBlank(projectToken)){
+        	 projectInfo.setCoordinates(new Coordinates(null, projectName, null));
+        }else{
+        	  projectInfo.setProjectToken(projectToken);
+        }
+        
         if (includePatterns.isEmpty())
         {
             log.error(WssUtils.logMsg(LOG_COMPONENT, "No include patterns defined. Failing."));
