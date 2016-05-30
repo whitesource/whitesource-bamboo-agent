@@ -44,7 +44,7 @@ public abstract class BaseOssInfoExtractor
                     + projectInfo.getDependencies().size()));
             for (DependencyInfo info : projectInfo.getDependencies())
             {
-                log.info(WssUtils.logMsg(getLogComponent(), info + " SHA-1: " + info.getSha1()));
+                log.info(WssUtils.logMsg(getLogComponent(), info.getArtifactId() + " SHA-1: " + info.getSha1()));
             }
         }
         log.info(WssUtils.logMsg(getLogComponent(), "----------------- dump finished -----------------"));

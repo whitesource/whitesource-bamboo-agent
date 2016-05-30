@@ -14,8 +14,9 @@ public final class WssUtils
 {
     /* --- Static members --- */
 
-    private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|$", Pattern.MULTILINE);
-    private static final Pattern KEY_VALUE_SPLIT_PATTERN = Pattern.compile("=");
+    //private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|$", Pattern.MULTILINE);
+	private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|\\s+");
+	private static final Pattern KEY_VALUE_SPLIT_PATTERN = Pattern.compile("=");
 
     /* --- Public methods --- */
 

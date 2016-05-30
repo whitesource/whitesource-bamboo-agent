@@ -1,6 +1,6 @@
 package org.whitesource.bamboo.plugin.task;
 
-import static org.whitesource.bamboo.plugin.Constants.API_KEY;
+import static org.whitesource.bamboo.plugin.Constants.*;
 import static org.whitesource.bamboo.plugin.Constants.BUILD_SUCCESSFUL_MARKER;
 import static org.whitesource.bamboo.plugin.Constants.CHECK_POLICIES;
 import static org.whitesource.bamboo.plugin.Constants.CONTACT_SUPPORT;
@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.whitesource.agent.api.dispatch.CheckPoliciesResult;
+import org.whitesource.agent.api.dispatch.CheckPolicyComplianceResult;
 import org.whitesource.agent.api.dispatch.UpdateInventoryResult;
 import org.whitesource.agent.api.model.AgentProjectInfo;
 import org.whitesource.agent.client.WhitesourceService;
@@ -92,7 +93,6 @@ public class AgentTask implements TaskType {
 	public TaskResult execute(TaskContext taskContext) throws TaskException {
 		AbstractMavenConfig config = null;
 		TaskResult result = null;
-		boolean checkPoliciesStatus = false;
 
 		final BuildLogger buildLogger = taskContext.getBuildLogger();
 		final ConfigurationMap configurationMap = taskContext.getConfigurationMap();
@@ -112,41 +112,23 @@ public class AgentTask implements TaskType {
 					.isTaskDefinitionPluginKeyEqual("com.atlassian.bamboo.plugins.maven:task.builder.mvn3"))) {
 				config = new Maven3Config(taskContext, capabilityContext, environmentVariableAccessor);
 			}
-
-			final Boolean checkPolicies = configurationMap.getAsBoolean(CHECK_POLICIES);
-
-			if (checkPolicies) {
-				buildLogger.addBuildLogEntry("Checking policies ...");
-				result = runMavenCommand("checkPolicies", taskContext, config);
-				if (result.getTaskState().equals(TaskState.SUCCESS)) {
-					buildLogger.addBuildLogEntry("all dependencies conform with open source policies.");
-					checkPoliciesStatus = true;
-				} else if ((result.getTaskState().equals(TaskState.FAILED))) {
-					buildLogger.addErrorLogEntry("... open source rejected by organization policies.");
-				} else if ((result.getTaskState().equals(TaskState.ERROR))) {
-					buildLogger.addBuildLogEntry("Error while checking Policies.");
-				}
+			
+			buildLogger.addBuildLogEntry("updating white source...");
+			result = runMavenCommand(taskContext, config);
+			if (result.getTaskState().equals(TaskState.SUCCESS)) {
+				buildLogger.addBuildLogEntry("Successfully updated White Source.");
+			} else if ((result.getTaskState().equals(TaskState.FAILED))) {
+				buildLogger.addErrorLogEntry("Failed updated White Source.");
+			} else if ((result.getTaskState().equals(TaskState.ERROR))) {
+				buildLogger.addErrorLogEntry("Error while updating White Source.");
 			}
-
-			if (checkPoliciesStatus || !checkPolicies) {
-				if (!checkPolicies) {
-					buildLogger.addBuildLogEntry("Ignoring policies checking ...");
-				}
-				buildLogger.addBuildLogEntry("updating white source...");
-				result = runMavenCommand("update", taskContext, config);
-				if (result.getTaskState().equals(TaskState.SUCCESS)) {
-					buildLogger.addBuildLogEntry("Successfully updated White Source.");
-				} else if ((result.getTaskState().equals(TaskState.FAILED))) {
-					buildLogger.addBuildLogEntry("Failed updated White Source.");
-				} else if ((result.getTaskState().equals(TaskState.ERROR))) {
-					buildLogger.addBuildLogEntry("Error while updating White Source.");
-				}
-			}
+			
 		} else if (GENERIC_TYPE.equals(projectType)) {
 
 			Collection<AgentProjectInfo> projectInfos = null;
-
-			BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(taskContext.getBuildContext().getProjectName(),
+			String fullPlanName = taskContext.getBuildContext().getPlanName();
+			String planName = fullPlanName.substring(fullPlanName.indexOf("-")+1, fullPlanName.lastIndexOf("-")).trim();
+			BaseOssInfoExtractor extractor = new GenericOssInfoExtractor(planName,
 					configurationMap.get(PROJECT_TOKEN), configurationMap.get(FILES_INCLUDE_PATTERN),
 					configurationMap.get(FILES_EXCLUDE_PATTERN), taskContext.getRootDirectory());
 			projectInfos = extractor.extract();
@@ -222,6 +204,7 @@ public class AgentTask implements TaskType {
 			Collection<AgentProjectInfo> projectInfos) {
 
 		TaskResult taskResult = taskResultBuilder.build();
+		UpdateInventoryResult updateResult = null;
 		
 		if (CollectionUtils.isEmpty(projectInfos)) {
 			buildLogger.addBuildLogEntry("No open source information found.");
@@ -232,27 +215,47 @@ public class AgentTask implements TaskType {
 			WhitesourceService service = WssUtils.createServiceClient(wssUrl);
 			try {
 				final String apiKey = configurationMap.get(API_KEY);
-				final Boolean checkPolicies = configurationMap.getAsBoolean(CHECK_POLICIES);
+				String productTokenOrName = configurationMap.get(PRODUCT_TOKEN);
+				final String productVersion = configurationMap.get(PRODUCT_VERSION);
+				boolean checkPolicies = false;
+				boolean forceCheckAll = false;
+				
+				if(StringUtils.isEmpty(productTokenOrName)){
+					productTokenOrName = buildContext.getProjectName();
+				}
+				
+				final String checkPoliciesType = configurationMap.get(CHECK_POLICIES);
+				if(ENABLE_ALL.equalsIgnoreCase(checkPoliciesType) || ENABLE_NEW.equalsIgnoreCase(checkPoliciesType)){
+					checkPolicies = true;
+					forceCheckAll  =  ENABLE_ALL.equalsIgnoreCase(checkPoliciesType);
+				}
 
 				if (checkPolicies) {
 					buildLogger.addBuildLogEntry("Checking policies ...");
-					CheckPoliciesResult result = service.checkPolicies(apiKey, projectInfos);
+					CheckPolicyComplianceResult result = service.checkPolicyCompliance(apiKey, productTokenOrName, productVersion, projectInfos, forceCheckAll);
 					reportCheckPoliciesResult(result, buildContext, buildDirectory, buildLogger);
 					if (result.hasRejections()) {
 						buildLogger.addErrorLogEntry("... open source rejected by organization policies.");
 						taskResult = taskResultBuilder.failedWithError().build();
 					} else {
 						buildLogger.addBuildLogEntry("... all dependencies conform with open source policies.");
-						final UpdateInventoryResult updateResult = service.update(apiKey, projectInfos);
-						logUpdateResult(updateResult, buildLogger);
-						buildLogger.addBuildLogEntry("Successfully updated White Source.");
+						updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos);
 					}
 				} else {
 					buildLogger.addBuildLogEntry("Ignoring policies ...");
-					final UpdateInventoryResult updateResult = service.update(apiKey, projectInfos);
-					logUpdateResult(updateResult, buildLogger);
-					buildLogger.addBuildLogEntry("Successfully updated White Source.");
+					updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos);
 				}
+				
+				if(updateResult==null || updateResult.getCreatedProjects().isEmpty() && updateResult.getUpdatedProjects().isEmpty()){
+					log.error(WssUtils.logMsg(LOG_COMPONENT, "Wss create/update failed"));
+					buildLogger.addErrorLogEntry("White Source project create/update failed, please check your tokens or Contact Administrator.");
+					taskResult = taskResultBuilder.failedWithError().build();
+				}else{
+					log.info(WssUtils.logMsg(LOG_COMPONENT, "Wss create/update success"));
+					buildLogger.addBuildLogEntry("White Source project create/update sucessfully");
+					logUpdateResult(updateResult, buildLogger);
+				}
+				
 			} catch (WssServiceException e) {
 				buildLogger.addErrorLogEntry("Communication with White Source failed.", e);
 				taskResult = taskResultBuilder.failedWithError().build();
@@ -267,7 +270,7 @@ public class AgentTask implements TaskType {
 		return taskResult;
 	}
 
-	private void reportCheckPoliciesResult(CheckPoliciesResult result, final BuildContext buildContext,
+	private void reportCheckPoliciesResult(CheckPolicyComplianceResult result, final BuildContext buildContext,
 			final File buildDirectory, BuildLogger buildLogger) throws IOException {
 		PolicyCheckReport report = new PolicyCheckReport(result, buildContext.getProjectName(),
 				buildContext.getBuildResultKey());
@@ -321,14 +324,15 @@ public class AgentTask implements TaskType {
 	}
 
 	private void logUpdateResult(UpdateInventoryResult result, BuildLogger buildLogger) {
+		
 		log.info(WssUtils.logMsg(LOG_COMPONENT, "update success"));
-
 		buildLogger.addBuildLogEntry("White Source update results: ");
 		buildLogger.addBuildLogEntry("White Source organization: " + result.getOrganization());
 		buildLogger.addBuildLogEntry(result.getCreatedProjects().size() + " Newly created projects:");
 		StringUtils.join(result.getCreatedProjects(), ",");
 		buildLogger.addBuildLogEntry(result.getUpdatedProjects().size() + " existing projects were updated:");
 		StringUtils.join(result.getUpdatedProjects(), ",");
+		
 	}
 
 	private List<String> populateaParams(TaskContext taskContext) {
@@ -345,7 +349,15 @@ public class AgentTask implements TaskType {
 			productTokenParam.append("-D").append("org.whitesource.product").append("=").append(productToken);
 			paramsList.add(productTokenParam.toString());
 		}
+		
+		final String productVersion = configurationMap.get(PRODUCT_VERSION);
+		StringBuilder productVersionParam = new StringBuilder();
 
+		if (StringUtils.isNotBlank(productVersion)) {
+			productVersionParam.append("-D").append("org.whitesource.productVersion").append("=").append(productVersion);
+			paramsList.add(productVersionParam.toString());
+		}
+		
 		final String projectToken = configurationMap.get(PROJECT_TOKEN);
 		StringBuilder projectTokenParam = new StringBuilder();
 
@@ -402,20 +414,25 @@ public class AgentTask implements TaskType {
 		return paramsList;
 	}
 
-	private TaskResult runMavenCommand(String goal, TaskContext taskContext, AbstractMavenConfig config)
+	private TaskResult runMavenCommand(TaskContext taskContext, AbstractMavenConfig config)
 			throws TaskException {
 
 		final BuildLogger buildLogger = taskContext.getBuildLogger();
 		final ConfigurationMap configurationMap = taskContext.getConfigurationMap();
 		final CurrentBuildResult currentBuildResult = taskContext.getBuildContext().getBuildResult();
-		// StringMatchingInterceptor buildSuccessMatcher =
-		// null,buildSuccessMatcher1=null,buildSuccessMatcher2=null;
+		boolean checkPolicies = false;
+		boolean forceCheckAll = false;
+		
+		final String checkPoliciesType = configurationMap.get(CHECK_POLICIES);
+		if(ENABLE_ALL.equalsIgnoreCase(checkPoliciesType) || ENABLE_NEW.equalsIgnoreCase(checkPoliciesType)){
+			checkPolicies = true;
+			forceCheckAll  =  ENABLE_ALL.equalsIgnoreCase(checkPoliciesType);
+		}
 
 		List<String> mavenCmd = new ArrayList<String>();
 		mavenCmd.addAll(config.getCommandline());
 		mavenCmd.add("-U");
-		// mavenCmd.add("org.whitesource:whitesource-maven-plugin:3.1.7:"+goal);
-		mavenCmd.add("org.whitesource:whitesource-maven-plugin:" + goal);
+		mavenCmd.add("org.whitesource:whitesource-maven-plugin:update");
 
 		final String wssUrl = configurationMap.get(SERVICE_URL_KEYWORD);
 		StringBuilder wssUrlParam = new StringBuilder();
@@ -424,12 +441,26 @@ public class AgentTask implements TaskType {
 			wssUrlParam.append("-D").append(SERVICE_URL_KEYWORD).append("=").append(wssUrl);
 			mavenCmd.add(wssUrlParam.toString());
 		}
-
+		
 		final String apiKey = configurationMap.get(API_KEY);
 		StringBuilder confParam = new StringBuilder();
 		confParam.append("-D").append("org.whitesource.orgToken").append("=").append(apiKey);
+		
 		mavenCmd.add(confParam.toString());
 		mavenCmd.addAll(populateaParams(taskContext));
+		
+		if(checkPolicies){
+			
+			StringBuilder checPolicyParam = new StringBuilder();
+			checPolicyParam.append("-D").append("org.whitesource.checkPolicies").append("=").append(checkPolicies);
+			mavenCmd.add(checPolicyParam.toString());
+			
+			if(forceCheckAll){
+				StringBuilder forceCheckParam = new StringBuilder();
+				forceCheckParam.append("-D").append("org.whitesource.forceCheckAllDependencies").append("=").append(forceCheckAll);
+				mavenCmd.add(forceCheckParam.toString());
+			}
+		}
 
 		buildLogger.addBuildLogEntry("Maven command to be executes ===> " + mavenCmd.toString());
 
@@ -450,10 +481,6 @@ public class AgentTask implements TaskType {
 			if (externalProcess.getHandler().isComplete()) {
 				TaskResultBuilder taskResultBuilder = TaskResultBuilder.newBuilder(taskContext)
 						.checkReturnCode(externalProcess, 0);
-
-				// taskResultBuilder =
-				// taskResultBuilder.checkInterceptorMatches(buildSuccessMatcher,
-				// FIND_SUCCESS_MESSAGE_IN_LAST);
 
 				return taskResultBuilder.build();
 			}

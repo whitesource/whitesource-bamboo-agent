@@ -25,15 +25,13 @@
 	<properties>
 		<bamboo.version>5.11.1</bamboo.version>
 		<bamboo.data.version>5.11.1</bamboo.data.version>
-		<!-- <bamboo.version>5.10.3</bamboo.version> -->
-		<!-- <bamboo.data.version>5.10.3</bamboo.data.version> -->
 		<amps.version>6.2.1</amps.version>
 		<plugin.testrunner.version>1.2.3</plugin.testrunner.version>
 		<atlassian.spring.scanner.version>1.2.6</atlassian.spring.scanner.version>
 		<!-- This key is used to keep the consistency between the key in atlassian-plugin.xml 
 			and the key to generate bundle. -->
 		<atlassian.plugin.key>${project.groupId}.${project.artifactId}</atlassian.plugin.key>
-		<wss.agents.version>1.2.1</wss.agents.version>
+		<wss.agents.version>2.2.7</wss.agents.version>
 	</properties>
 
 	<dependencies>
@@ -84,13 +82,16 @@
 			<artifactId>gson</artifactId>
 			<version>2.2.2-atlassian-1</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>junit</groupId>
+		    <artifactId>junit</artifactId>
+		   <version>4.12</version>
+		    <scope>test</scope>
+		</dependency>
+		
 
 		<!-- white source Http Api -->
-	 	<dependency>
-	      <groupId>org.whitesource</groupId>
-	      <artifactId>wss-agent-api</artifactId>
-	      <version>${wss.agents.version}</version>
-	    </dependency>
 	    <dependency>
 	      <groupId>org.whitesource</groupId>
 	      <artifactId>wss-agent-api-client</artifactId>
@@ -106,6 +107,14 @@
 
 	<build>
 		<plugins>
+			<plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
 		 	<plugin>
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>maven-bamboo-plugin</artifactId>
