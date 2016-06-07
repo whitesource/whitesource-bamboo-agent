@@ -4,6 +4,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.file.FileSystems;
+import java.nio.file.PathMatcher;
 import java.util.Collection;
 
 import org.junit.After;
@@ -31,8 +33,25 @@ public class GenericOssInfoExtractorTest {
 	}
 	
 	@Test
+	@Ignore
+	public void simpleTest(){
+		String pattern = "**/*.pl";
+		String glob;
+		String path="/Users/gangadhar/Desktop/bahar/bamboo/v1/latest/git/openssl/openssl/os2/backwardify.pl";
+		if(pattern.startsWith("*")){
+			//glob = "glob:" + startingDir+pattern;
+			glob = "glob:"+pattern;
+		}else{
+			//glob = "glob:" + startingDir+File.separatorChar+pattern;
+			glob = "glob:"+File.separatorChar+pattern;
+		}
+		final PathMatcher includePathMatcher = FileSystems.getDefault().getPathMatcher(glob);
+		assertTrue(includePathMatcher.matches(new File(path).toPath()));
+	}
+	
+	@Test
 	public void extractOssInfoTest1(){
-		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","ms/*.c","",new File("/Users/gangadhar/Desktop/bahar/bamboo/v1/latest/git/openssl/openssl"));
+		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","ms/*.c","",new File(startingDir));
 		Collection<AgentProjectInfo> projectInfos = genericOssInfoExtractorTest.extract();
 		assertFalse(projectInfos.isEmpty());
 		log.info(Integer.toString(projectInfos.iterator().next().getDependencies().size()));
@@ -41,7 +60,7 @@ public class GenericOssInfoExtractorTest {
 	
 	@Test
 	public void extractOssInfoTest2(){
-		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","**/ms/*.c","",new File("/Users/gangadhar/Desktop/bahar/bamboo/v1/latest/git/openssl/openssl"));
+		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","**/ms/*.c","",new File(startingDir));
 		Collection<AgentProjectInfo> projectInfos = genericOssInfoExtractorTest.extract();
 		assertFalse(projectInfos.isEmpty());
 		log.info(Integer.toString(projectInfos.iterator().next().getDependencies().size()));
@@ -50,7 +69,7 @@ public class GenericOssInfoExtractorTest {
 	
 	@Test
 	public void extractOssInfoTest3(){
-		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","**/*.c","",new File("/Users/gangadhar/Desktop/bahar/bamboo/v1/latest/git/openssl/openssl"));
+		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","**/*.c","",new File(startingDir));
 		Collection<AgentProjectInfo> projectInfos = genericOssInfoExtractorTest.extract();
 		assertFalse(projectInfos.isEmpty());
 		log.info(Integer.toString(projectInfos.iterator().next().getDependencies().size()));
@@ -58,7 +77,7 @@ public class GenericOssInfoExtractorTest {
 	
 	@Test
 	public void extractOssInfoTest4(){
-		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","doc/HOWTO/*.txt","doc/HOWTO/keys*.txt",new File("/Users/gangadhar/Desktop/bahar/bamboo/v1/latest/git/openssl/openssl"));
+		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","doc/HOWTO/*.txt","doc/HOWTO/keys*.txt",new File(startingDir));
 		Collection<AgentProjectInfo> projectInfos = genericOssInfoExtractorTest.extract();
 		assertFalse(projectInfos.isEmpty());
 		log.info(Integer.toString(projectInfos.iterator().next().getDependencies().size()));
@@ -67,7 +86,7 @@ public class GenericOssInfoExtractorTest {
 	
 	@Test
 	public void extractOssInfoTest5(){
-		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","MacOS/*.cpp,MacOS/*.hqx","",new File("/Users/gangadhar/Desktop/bahar/bamboo/v1/latest/git/openssl/openssl"));
+		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","MacOS/*.cpp,MacOS/*.hqx","",new File(startingDir));
 		Collection<AgentProjectInfo> projectInfos = genericOssInfoExtractorTest.extract();
 		assertFalse(projectInfos.isEmpty());
 		log.info(Integer.toString(projectInfos.iterator().next().getDependencies().size()));
@@ -77,7 +96,7 @@ public class GenericOssInfoExtractorTest {
 	//space and comma,
 	@Test
 	public void extractOssInfoTest6(){
-		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","MacOS/*.hqx,MacOS/*.cpp,MacOS/*.h","MacOS/*.hqx MacOS/*.cpp",new File("/Users/gangadhar/Desktop/bahar/bamboo/v1/latest/git/openssl/openssl"));
+		genericOssInfoExtractorTest = new GenericOssInfoExtractor("test","test","MacOS/*.hqx,MacOS/*.cpp,MacOS/*.h","MacOS/*.hqx MacOS/*.cpp",new File(startingDir));
 		Collection<AgentProjectInfo> projectInfos = genericOssInfoExtractorTest.extract();
 		assertFalse(projectInfos.isEmpty());
 		log.info(Integer.toString(projectInfos.iterator().next().getDependencies().size()));

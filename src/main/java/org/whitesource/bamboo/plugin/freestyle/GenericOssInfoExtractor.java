@@ -8,7 +8,6 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -87,26 +86,31 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor {
 	public void extractOssInfo(final File root,
 			final Collection<DependencyInfo> dependencyInfos) {
 		
-		Path startingDir = Paths.get(root.getAbsolutePath());
+		//Path startingDir = Paths.get(root.getAbsolutePath());
 		String glob;
+		String startingDir;
 		
 		for (String pattern : includePatterns) {
 
 			if(pattern.startsWith("*")){
-				glob = "glob:" + startingDir+pattern;
+				glob = "glob:"+pattern;
 			}else{
-				glob = "glob:" + startingDir+File.separatorChar+pattern;
+				startingDir = root.getAbsolutePath();
+				if(System.getProperty("os.name").startsWith("Windows")){
+					startingDir = startingDir.replace("\\", "/");
+				}
+				glob = "glob:"+startingDir+"/"+pattern;
 			}
 
 			final PathMatcher includePathMatcher = FileSystems.getDefault().getPathMatcher(glob);
 
 			try {
-				Files.walkFileTree(startingDir, new SimpleFileVisitor<Path>() {
+				Files.walkFileTree(root.toPath(), new SimpleFileVisitor<Path>() {
 					@Override
 					public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
 						
-						if (includePathMatcher.matches(path) && !checkForExclusions(path,startingDir)) {
-							log.info("File :" + path.toFile());
+						if (includePathMatcher.matches(path) && !checkForExclusions(path,root)) {
+							log.debug("File :" + path.toFile());
 							dependencyInfos.add(extractDepependencyInfo(path.toFile()));
 						}
 						return FileVisitResult.CONTINUE;
@@ -125,17 +129,22 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor {
 		
 	}
 	
-	private boolean checkForExclusions(Path path,Path startingDir){
+	private boolean checkForExclusions(Path path,File root){
 		
 		String glob;
 		boolean exFlag = false;
+		String startingDir;
 		
 		for (String pattern : excludePatterns) {
 
 			if(pattern.startsWith("*")){
-				glob = "glob:" + startingDir+pattern;
+				glob = "glob:"+pattern;
 			}else{
-				glob = "glob:" + startingDir+File.separatorChar+pattern;
+				startingDir = root.getAbsolutePath();
+				if(System.getProperty("os.name").startsWith("Windows")){
+					startingDir = startingDir.replace("\\", "/");
+				}
+				glob = "glob:"+startingDir+"/"+pattern;
 			}
 
 			final PathMatcher excludePathMatcher = FileSystems.getDefault().getPathMatcher(glob);
