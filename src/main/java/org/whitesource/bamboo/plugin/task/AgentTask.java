@@ -1,13 +1,15 @@
 package org.whitesource.bamboo.plugin.task;
 
-import static org.whitesource.bamboo.plugin.Constants.*;
+import static org.whitesource.bamboo.plugin.Constants.API_KEY;
 import static org.whitesource.bamboo.plugin.Constants.BUILD_SUCCESSFUL_MARKER;
 import static org.whitesource.bamboo.plugin.Constants.CHECK_POLICIES;
 import static org.whitesource.bamboo.plugin.Constants.CONTACT_SUPPORT;
+import static org.whitesource.bamboo.plugin.Constants.FAIL_CHECK_POLICIES;
 import static org.whitesource.bamboo.plugin.Constants.FILES_EXCLUDE_PATTERN;
 import static org.whitesource.bamboo.plugin.Constants.FILES_INCLUDE_PATTERN;
 import static org.whitesource.bamboo.plugin.Constants.GENERIC_TYPE;
 import static org.whitesource.bamboo.plugin.Constants.IGNORE_POM;
+import static org.whitesource.bamboo.plugin.Constants.JUST_CHECK_POLICIES;
 import static org.whitesource.bamboo.plugin.Constants.KEY_VALUE_SPLIT_PATTERN;
 import static org.whitesource.bamboo.plugin.Constants.LINES_TO_PARSE_FOR_ERRORS;
 import static org.whitesource.bamboo.plugin.Constants.LOG_COMPONENT;
@@ -17,6 +19,7 @@ import static org.whitesource.bamboo.plugin.Constants.MODULES_INCLUDE_PATTERN;
 import static org.whitesource.bamboo.plugin.Constants.MODULE_TOKENS;
 import static org.whitesource.bamboo.plugin.Constants.PARAM_LIST_SPLIT_PATTERN;
 import static org.whitesource.bamboo.plugin.Constants.PRODUCT_TOKEN;
+import static org.whitesource.bamboo.plugin.Constants.PRODUCT_VERSION;
 import static org.whitesource.bamboo.plugin.Constants.PROJECT_TOKEN;
 import static org.whitesource.bamboo.plugin.Constants.PROJECT_TYPE;
 import static org.whitesource.bamboo.plugin.Constants.SEARCH_BUILD_SUCCESS_FAIL_MESSAGE_EVERYWHERE;
@@ -35,7 +38,6 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import org.whitesource.agent.api.dispatch.CheckPoliciesResult;
 import org.whitesource.agent.api.dispatch.CheckPolicyComplianceResult;
 import org.whitesource.agent.api.dispatch.UpdateInventoryResult;
 import org.whitesource.agent.api.model.AgentProjectInfo;
@@ -217,33 +219,37 @@ public class AgentTask implements TaskType {
 				final String apiKey = configurationMap.get(API_KEY);
 				String productTokenOrName = configurationMap.get(PRODUCT_TOKEN);
 				final String productVersion = configurationMap.get(PRODUCT_VERSION);
-				boolean checkPolicies = false;
-				boolean forceCheckAll = false;
 				
 				if(StringUtils.isEmpty(productTokenOrName)){
 					productTokenOrName = buildContext.getProjectName();
 				}
 				
 				final String checkPoliciesType = configurationMap.get(CHECK_POLICIES);
-				if(ENABLE_ALL.equalsIgnoreCase(checkPoliciesType) || ENABLE_NEW.equalsIgnoreCase(checkPoliciesType)){
-					checkPolicies = true;
-					forceCheckAll  =  ENABLE_ALL.equalsIgnoreCase(checkPoliciesType);
-				}
 
-				if (checkPolicies) {
+				if(JUST_CHECK_POLICIES.equalsIgnoreCase(checkPoliciesType) || FAIL_CHECK_POLICIES.equalsIgnoreCase(checkPoliciesType)){
+					
 					buildLogger.addBuildLogEntry("Checking policies ...");
-					CheckPolicyComplianceResult result = service.checkPolicyCompliance(apiKey, productTokenOrName, productVersion, projectInfos, forceCheckAll);
+					CheckPolicyComplianceResult result = service.checkPolicyCompliance(apiKey, productTokenOrName, productVersion, projectInfos, true);
 					reportCheckPoliciesResult(result, buildContext, buildDirectory, buildLogger);
+					
 					if (result.hasRejections()) {
+						
 						buildLogger.addErrorLogEntry("... open source rejected by organization policies.");
-						taskResult = taskResultBuilder.failedWithError().build();
-					} else {
-						buildLogger.addBuildLogEntry("... all dependencies conform with open source policies.");
-						updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos);
-					}
-				} else {
-					buildLogger.addBuildLogEntry("Ignoring policies ...");
+						if(FAIL_CHECK_POLICIES.equalsIgnoreCase(checkPoliciesType)){
+							//check policies fail the build if any violations.
+							taskResult = taskResultBuilder.failedWithError().build();
+							return taskResult;
+						}
+						
+					} 
+					//just check policies case
 					updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos);
+					
+				} else {
+					// no policy check
+					buildLogger.addBuildLogEntry("Not checked any policies and updating results.");
+					updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos);
+					
 				}
 				
 				if(updateResult==null || updateResult.getCreatedProjects().isEmpty() && updateResult.getUpdatedProjects().isEmpty()){
@@ -420,14 +426,7 @@ public class AgentTask implements TaskType {
 		final BuildLogger buildLogger = taskContext.getBuildLogger();
 		final ConfigurationMap configurationMap = taskContext.getConfigurationMap();
 		final CurrentBuildResult currentBuildResult = taskContext.getBuildContext().getBuildResult();
-		boolean checkPolicies = false;
-		boolean forceCheckAll = false;
-		
 		final String checkPoliciesType = configurationMap.get(CHECK_POLICIES);
-		if(ENABLE_ALL.equalsIgnoreCase(checkPoliciesType) || ENABLE_NEW.equalsIgnoreCase(checkPoliciesType)){
-			checkPolicies = true;
-			forceCheckAll  =  ENABLE_ALL.equalsIgnoreCase(checkPoliciesType);
-		}
 
 		List<String> mavenCmd = new ArrayList<String>();
 		mavenCmd.addAll(config.getCommandline());
@@ -449,17 +448,15 @@ public class AgentTask implements TaskType {
 		mavenCmd.add(confParam.toString());
 		mavenCmd.addAll(populateaParams(taskContext));
 		
-		if(checkPolicies){
+		// we will do check policies only for FAIL_CHECK_POLICIES case.
+		if( FAIL_CHECK_POLICIES.equalsIgnoreCase(checkPoliciesType)){
 			
 			StringBuilder checPolicyParam = new StringBuilder();
-			checPolicyParam.append("-D").append("org.whitesource.checkPolicies").append("=").append(checkPolicies);
+			checPolicyParam.append("-D").append("org.whitesource.checkPolicies").append("=").append(true);
 			mavenCmd.add(checPolicyParam.toString());
-			
-			if(forceCheckAll){
-				StringBuilder forceCheckParam = new StringBuilder();
-				forceCheckParam.append("-D").append("org.whitesource.forceCheckAllDependencies").append("=").append(forceCheckAll);
-				mavenCmd.add(forceCheckParam.toString());
-			}
+			StringBuilder forceCheckParam = new StringBuilder();
+			forceCheckParam.append("-D").append("org.whitesource.forceCheckAllDependencies").append("=").append(true);
+			mavenCmd.add(forceCheckParam.toString());
 		}
 
 		buildLogger.addBuildLogEntry("Maven command to be executes ===> " + mavenCmd.toString());

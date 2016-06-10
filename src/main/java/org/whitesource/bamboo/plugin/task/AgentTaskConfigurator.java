@@ -8,7 +8,7 @@ import static org.whitesource.bamboo.plugin.Constants.CTX_PLAN;
 import static org.whitesource.bamboo.plugin.Constants.DEFAULT_IGNORE_POM;
 import static org.whitesource.bamboo.plugin.Constants.DEFAULT_SERVICE_URL;
 import static org.whitesource.bamboo.plugin.Constants.DEFAULT_TYPE;
-import static org.whitesource.bamboo.plugin.Constants.ENABLE_NEW;
+import static org.whitesource.bamboo.plugin.Constants.JUST_CHECK_POLICIES;
 import static org.whitesource.bamboo.plugin.Constants.FIELD_COLLECTION;
 import static org.whitesource.bamboo.plugin.Constants.IGNORE_POM;
 import static org.whitesource.bamboo.plugin.Constants.MAVEN_TYPE;
@@ -62,7 +62,7 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator implements T
 		context.put(CHECK_POLICIES_TYPES, CHECK_POLICIES_MAP);
 		context.put(PROJECT_TYPES, TYPE_MAP);
 		context.put(PROJECT_TYPE, detectProjectType(context));
-		context.put(CHECK_POLICIES, ENABLE_NEW);
+		context.put(CHECK_POLICIES, JUST_CHECK_POLICIES);
 		context.put(IGNORE_POM, DEFAULT_IGNORE_POM);
 		context.put(SERVICE_URL_KEYWORD, DEFAULT_SERVICE_URL);
 		context.put("mode", "create");

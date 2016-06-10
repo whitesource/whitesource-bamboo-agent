@@ -16,14 +16,13 @@ public class Constants {
 	public static final String API_KEY = "apiKey";
 	public static final String CHECK_POLICIES = "checkPolicies";
 	public static final String CHECK_POLICIES_TYPES = "checkPolicyTypes";
-    public static final String ENABLE_NEW = "Check Only New Libraries";
-    public static final String ENABLE_ALL = "Force Check All Libraries";
+
+	public static final String JUST_CHECK_POLICIES = "Check Policies";
+    public static final String FAIL_CHECK_POLICIES = "Policy Violation Fail Build";
     public static final String DISABLED = "Disable";
-   
     
-	
 	public static final Map<String, String> CHECK_POLICIES_MAP = ImmutableMap.<String, String> builder()
-	        .put(ENABLE_NEW, ENABLE_NEW).put(ENABLE_ALL, ENABLE_ALL).put(DISABLED, DISABLED).build();
+	        .put(JUST_CHECK_POLICIES, JUST_CHECK_POLICIES).put(FAIL_CHECK_POLICIES, FAIL_CHECK_POLICIES).put(DISABLED, DISABLED).build();
 	
 	public static final String PROJECT_TYPE = "projectType";
 	public static final String PROJECT_TYPES = "projectTypes";
