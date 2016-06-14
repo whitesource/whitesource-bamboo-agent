@@ -4,12 +4,10 @@ import static org.whitesource.bamboo.plugin.Constants.API_KEY;
 import static org.whitesource.bamboo.plugin.Constants.BUILD_SUCCESSFUL_MARKER;
 import static org.whitesource.bamboo.plugin.Constants.CHECK_POLICIES;
 import static org.whitesource.bamboo.plugin.Constants.CONTACT_SUPPORT;
-import static org.whitesource.bamboo.plugin.Constants.FAIL_CHECK_POLICIES;
 import static org.whitesource.bamboo.plugin.Constants.FILES_EXCLUDE_PATTERN;
 import static org.whitesource.bamboo.plugin.Constants.FILES_INCLUDE_PATTERN;
 import static org.whitesource.bamboo.plugin.Constants.GENERIC_TYPE;
 import static org.whitesource.bamboo.plugin.Constants.IGNORE_POM;
-import static org.whitesource.bamboo.plugin.Constants.JUST_CHECK_POLICIES;
 import static org.whitesource.bamboo.plugin.Constants.KEY_VALUE_SPLIT_PATTERN;
 import static org.whitesource.bamboo.plugin.Constants.LINES_TO_PARSE_FOR_ERRORS;
 import static org.whitesource.bamboo.plugin.Constants.LOG_COMPONENT;
@@ -224,9 +222,9 @@ public class AgentTask implements TaskType {
 					productTokenOrName = buildContext.getProjectName();
 				}
 				
-				final String checkPoliciesType = configurationMap.get(CHECK_POLICIES);
+				final boolean checkPolicies = configurationMap.getAsBoolean(CHECK_POLICIES);
 
-				if(JUST_CHECK_POLICIES.equalsIgnoreCase(checkPoliciesType) || FAIL_CHECK_POLICIES.equalsIgnoreCase(checkPoliciesType)){
+				if(checkPolicies){
 					
 					buildLogger.addBuildLogEntry("Checking policies ...");
 					CheckPolicyComplianceResult result = service.checkPolicyCompliance(apiKey, productTokenOrName, productVersion, projectInfos, true);
@@ -235,15 +233,15 @@ public class AgentTask implements TaskType {
 					if (result.hasRejections()) {
 						
 						buildLogger.addErrorLogEntry("... open source rejected by organization policies.");
-						if(FAIL_CHECK_POLICIES.equalsIgnoreCase(checkPoliciesType)){
-							//check policies fail the build if any violations.
-							taskResult = taskResultBuilder.failedWithError().build();
-							return taskResult;
-						}
+						//check policies fail the build if any violations.
+						taskResult = taskResultBuilder.failedWithError().build();
+						return taskResult;
 						
-					} 
-					//just check policies case
-					updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos);
+					} else{
+						
+						updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos);
+					}
+					
 					
 				} else {
 					// no policy check
@@ -318,8 +316,6 @@ public class AgentTask implements TaskType {
 		}
 
 		if (reportArchive != null) {
-			// ArtifactDefinitionContext artifact = new
-			// ArtifactDefinitionContextImpl();
 			ArtifactDefinitionContext artifact = new ArtifactDefinitionContextImpl(reportArchive.getName(), false,
 					SecureToken.create());
 			artifact.setName(reportArchive.getName());
@@ -426,7 +422,7 @@ public class AgentTask implements TaskType {
 		final BuildLogger buildLogger = taskContext.getBuildLogger();
 		final ConfigurationMap configurationMap = taskContext.getConfigurationMap();
 		final CurrentBuildResult currentBuildResult = taskContext.getBuildContext().getBuildResult();
-		final String checkPoliciesType = configurationMap.get(CHECK_POLICIES);
+		final boolean checkPolicies = configurationMap.getAsBoolean(CHECK_POLICIES);
 
 		List<String> mavenCmd = new ArrayList<String>();
 		mavenCmd.addAll(config.getCommandline());
@@ -449,7 +445,7 @@ public class AgentTask implements TaskType {
 		mavenCmd.addAll(populateaParams(taskContext));
 		
 		// we will do check policies only for FAIL_CHECK_POLICIES case.
-		if( FAIL_CHECK_POLICIES.equalsIgnoreCase(checkPoliciesType)){
+		if(checkPolicies){
 			
 			StringBuilder checPolicyParam = new StringBuilder();
 			checPolicyParam.append("-D").append("org.whitesource.checkPolicies").append("=").append(true);

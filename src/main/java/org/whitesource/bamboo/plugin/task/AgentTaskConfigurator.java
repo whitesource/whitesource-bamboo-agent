@@ -1,15 +1,14 @@
 package org.whitesource.bamboo.plugin.task;
 
-import static org.whitesource.bamboo.plugin.Constants.CHECK_POLICIES;
-import static org.whitesource.bamboo.plugin.Constants.CHECK_POLICIES_MAP;
-import static org.whitesource.bamboo.plugin.Constants.CHECK_POLICIES_TYPES;
+import static org.whitesource.bamboo.plugin.Constants.API_KEY;
 import static org.whitesource.bamboo.plugin.Constants.CTX_MAVEN_JOB;
 import static org.whitesource.bamboo.plugin.Constants.CTX_PLAN;
 import static org.whitesource.bamboo.plugin.Constants.DEFAULT_IGNORE_POM;
 import static org.whitesource.bamboo.plugin.Constants.DEFAULT_SERVICE_URL;
 import static org.whitesource.bamboo.plugin.Constants.DEFAULT_TYPE;
-import static org.whitesource.bamboo.plugin.Constants.JUST_CHECK_POLICIES;
 import static org.whitesource.bamboo.plugin.Constants.FIELD_COLLECTION;
+import static org.whitesource.bamboo.plugin.Constants.FILES_INCLUDE_PATTERN;
+import static org.whitesource.bamboo.plugin.Constants.GENERIC_TYPE;
 import static org.whitesource.bamboo.plugin.Constants.IGNORE_POM;
 import static org.whitesource.bamboo.plugin.Constants.MAVEN_TYPE;
 import static org.whitesource.bamboo.plugin.Constants.PROJECT_TYPE;
@@ -21,6 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,6 +33,7 @@ import com.atlassian.bamboo.task.TaskDefinition;
 import com.atlassian.bamboo.task.TaskRequirementSupport;
 import com.atlassian.bamboo.util.Narrow;
 import com.atlassian.bamboo.utils.BambooPredicates;
+import com.atlassian.bamboo.utils.error.ErrorCollection;
 import com.atlassian.bamboo.v2.build.agent.capability.Requirement;
 import com.google.common.collect.Iterables;
 
@@ -50,19 +51,34 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator implements T
 
 		if (previousTaskDefinition != null) {
 			config.put(PROJECT_TYPE, previousTaskDefinition.getConfiguration().get(PROJECT_TYPE));
-			config.put(CHECK_POLICIES, previousTaskDefinition.getConfiguration().get(CHECK_POLICIES));
 		}
 
 		return config;
 	}
 	
 	@Override
+	public void validate(@NotNull final ActionParametersMap params, @NotNull final ErrorCollection errorCollection){
+	    super.validate(params, errorCollection);
+	  
+	    final String apiKey = params.getString(API_KEY);
+	    final String includePattern = params.getString(FILES_INCLUDE_PATTERN);
+	    if (StringUtils.isEmpty(apiKey)){
+	        errorCollection.addError(API_KEY," Field can't be empty.");
+	    }
+	    
+	    // for edit case we projectTypeForValidation, as there is a problem with the ui.bambooSection tag.
+	    String projectType = params.getString(PROJECT_TYPE)!=null?params.getString(PROJECT_TYPE):params.getString("projectTypeForValidation");
+	   
+	    if (StringUtils.isEmpty(includePattern) && projectType!=null && projectType.equalsIgnoreCase(GENERIC_TYPE)){
+	    	errorCollection.addError(FILES_INCLUDE_PATTERN, "Field can't be empty.");
+	    }
+	}
+	
+	@Override
 	public void populateContextForCreate(@NotNull final Map<String, Object> context) {
 		super.populateContextForCreate(context);
-		context.put(CHECK_POLICIES_TYPES, CHECK_POLICIES_MAP);
 		context.put(PROJECT_TYPES, TYPE_MAP);
 		context.put(PROJECT_TYPE, detectProjectType(context));
-		context.put(CHECK_POLICIES, JUST_CHECK_POLICIES);
 		context.put(IGNORE_POM, DEFAULT_IGNORE_POM);
 		context.put(SERVICE_URL_KEYWORD, DEFAULT_SERVICE_URL);
 		context.put("mode", "create");
@@ -75,7 +91,6 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator implements T
 		taskConfiguratorHelper.populateContextWithConfiguration(context, taskDefinition,
 				Iterables.concat(FIELD_COLLECTION, getFieldCollection()));
 		context.put(PROJECT_TYPES, TYPE_MAP);
-		context.put(CHECK_POLICIES_TYPES, CHECK_POLICIES_MAP);
 		context.put("mode", "edit");
 	}
 

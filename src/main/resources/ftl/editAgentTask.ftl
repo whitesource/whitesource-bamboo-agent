@@ -10,14 +10,15 @@
 		[@ui.messageBox type="info" titleKey="org.whitesource.bamboo.plugins.projectType.detection.generic" /]
 	[/@ui.bambooSection]
 	[@ww.textfield labelKey="org.whitesource.bamboo.plugins.apiKey" name="apiKey" cssClass="long-field" required='true'/]
-	[@ww.radio labelKey="org.whitesource.bamboo.plugins.checkPolicies" name="checkPolicies" list="checkPolicyTypes" toggle="true"/]
 	<div class="matrix">
 	[@ww.radio labelKey="org.whitesource.bamboo.plugins.projectType" name="projectType" list="projectTypes" toggle="true"/]
 	</div>
+	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.checkPolicies" name="checkPolicies"/]
 [#elseif mode == "edit"]
 	[@ww.textfield labelKey="org.whitesource.bamboo.plugins.apiKey" name="apiKey" cssClass="long-field" required='true'/]
 	[@ww.label labelKey="org.whitesource.bamboo.plugins.projectType" name="projectType"/]
-	[@ww.radio labelKey="org.whitesource.bamboo.plugins.checkPolicies" name="checkPolicies" list="checkPolicyTypes" toggle="true"/]
+	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.checkPolicies" name="checkPolicies"/]
+	[@ww.hidden  name="projectTypeForValidation" value="${projectType}"/]
 [/#if]
 [@ww.textfield labelKey="org.whitesource.bamboo.plugins.wssUrl" name="wss.url" cssClass="long-field" required='false'/]
 [@ww.textfield labelKey="org.whitesource.bamboo.plugins.productToken" name="productToken" cssClass="long-field" required='false'/]

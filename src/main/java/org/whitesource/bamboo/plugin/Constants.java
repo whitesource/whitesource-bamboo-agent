@@ -15,14 +15,6 @@ public class Constants {
 	
 	public static final String API_KEY = "apiKey";
 	public static final String CHECK_POLICIES = "checkPolicies";
-	public static final String CHECK_POLICIES_TYPES = "checkPolicyTypes";
-
-	public static final String JUST_CHECK_POLICIES = "Check Policies";
-    public static final String FAIL_CHECK_POLICIES = "Policy Violation Fail Build";
-    public static final String DISABLED = "Disable";
-    
-	public static final Map<String, String> CHECK_POLICIES_MAP = ImmutableMap.<String, String> builder()
-	        .put(JUST_CHECK_POLICIES, JUST_CHECK_POLICIES).put(FAIL_CHECK_POLICIES, FAIL_CHECK_POLICIES).put(DISABLED, DISABLED).build();
 	
 	public static final String PROJECT_TYPE = "projectType";
 	public static final String PROJECT_TYPES = "projectTypes";
@@ -46,16 +38,14 @@ public class Constants {
 	        .<String> builder()
 	        .add(API_KEY, CHECK_POLICIES, PROJECT_TYPE, PRODUCT_TOKEN,PROJECT_TOKEN, PRODUCT_VERSION,MODULE_TOKENS, MODULES_INCLUDE_PATTERN,
 	                MODULES_EXCLUDE_PATTERN, FILES_INCLUDE_PATTERN, FILES_EXCLUDE_PATTERN, IGNORE_POM,SERVICE_URL_KEYWORD).build();
-	public static final String GENERIC_TYPE = "Freestyle"; // @todo: an enum would be helpful of course ...
-	public static final String MAVEN_TYPE = "Maven"; // @todo: an enum would be helpful of course ...
+	public static final String GENERIC_TYPE = "Freestyle";
+	public static final String MAVEN_TYPE = "Maven";
 	public static final Map<String, String> TYPE_MAP = ImmutableMap.<String, String> builder()
 	        .put(MAVEN_TYPE, MAVEN_TYPE).put(GENERIC_TYPE, GENERIC_TYPE).build();
 	public static final String OPTION_TRUE = "True";
 	public static final String OPTION_FALSE = "False";
 	public static final String DEFAULT_TYPE = GENERIC_TYPE;
-	public static final String DEFAULT_FILES_INCLUDES_PATTERN = "lib/*.jar";
 	public static final String DEFAULT_IGNORE_POM = OPTION_FALSE;
-	public static final String DEFAULT_CHECK_POLICIES = OPTION_FALSE;
 	public static final String CTX_PLAN = "plan";
 	public static final String CTX_MAVEN_JOB = "mavenJob";
 	
