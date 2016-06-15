@@ -1,7 +1,8 @@
 package org.whitesource.bamboo.plugin.task;
 
-import static org.whitesource.bamboo.plugin.Constants.API_KEY;
-import static org.whitesource.bamboo.plugin.Constants.BUILD_SUCCESSFUL_MARKER;
+import static org.whitesource.bamboo.plugin.Constants.*;
+import static org.whitesource.bamboo.plugin.Constants.BUILD_SUCCESSFUL_MARKER_CHECKPOLICIES;
+import static org.whitesource.bamboo.plugin.Constants.BUILD_SUCCESSFUL_MARKER_UPDATE;
 import static org.whitesource.bamboo.plugin.Constants.CHECK_POLICIES;
 import static org.whitesource.bamboo.plugin.Constants.CONTACT_SUPPORT;
 import static org.whitesource.bamboo.plugin.Constants.FILES_EXCLUDE_PATTERN;
@@ -423,6 +424,8 @@ public class AgentTask implements TaskType {
 		final ConfigurationMap configurationMap = taskContext.getConfigurationMap();
 		final CurrentBuildResult currentBuildResult = taskContext.getBuildContext().getBuildResult();
 		final boolean checkPolicies = configurationMap.getAsBoolean(CHECK_POLICIES);
+		StringMatchingInterceptor buildSuccessMatcher = new StringMatchingInterceptor(BUILD_SUCCESSFUL_MARKER_UPDATE,
+				SEARCH_BUILD_SUCCESS_FAIL_MESSAGE_EVERYWHERE);
 
 		List<String> mavenCmd = new ArrayList<String>();
 		mavenCmd.addAll(config.getCommandline());
@@ -453,12 +456,12 @@ public class AgentTask implements TaskType {
 			StringBuilder forceCheckParam = new StringBuilder();
 			forceCheckParam.append("-D").append("org.whitesource.forceCheckAllDependencies").append("=").append(true);
 			mavenCmd.add(forceCheckParam.toString());
+			buildSuccessMatcher = new StringMatchingInterceptor(BUILD_SUCCESSFUL_MARKER_CHECKPOLICIES,
+					SEARCH_BUILD_SUCCESS_FAIL_MESSAGE_EVERYWHERE);
 		}
 
 		buildLogger.addBuildLogEntry("Maven command to be executes ===> " + mavenCmd.toString());
-
-		StringMatchingInterceptor buildSuccessMatcher = new StringMatchingInterceptor(BUILD_SUCCESSFUL_MARKER,
-				SEARCH_BUILD_SUCCESS_FAIL_MESSAGE_EVERYWHERE);
+		
 		LogMemorisingInterceptor recentLogLines = new LogMemorisingInterceptor(LINES_TO_PARSE_FOR_ERRORS);
 		ErrorMemorisingInterceptor errorLines = new ErrorMemorisingInterceptor();
 
@@ -472,9 +475,16 @@ public class AgentTask implements TaskType {
 							.env(config.getExtraEnvironment()).command(mavenCmd));
 
 			if (externalProcess.getHandler().isComplete()) {
+				
+				/*TaskResultBuilder taskResultBuilder = TaskResultBuilder.newBuilder(taskContext)
+						.checkReturnCode(externalProcess, 0);*/
+				
 				TaskResultBuilder taskResultBuilder = TaskResultBuilder.newBuilder(taskContext)
-						.checkReturnCode(externalProcess, 0);
+						.checkReturnCode(externalProcess, 0)
+						.checkInterceptorMatches(buildSuccessMatcher, FIND_SUCCESS_MESSAGE_IN_LAST);
 
+				
+				
 				return taskResultBuilder.build();
 			}
 			throw new TaskException("Failed to execute command, external process not completed?");

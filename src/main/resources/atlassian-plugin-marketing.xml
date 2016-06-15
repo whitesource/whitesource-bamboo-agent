@@ -1,0 +1,23 @@
+<atlassian-plugin-marketing>
+      <compatibility>
+        <product name="bamboo" min="5.9.10" max="5.11.1"/>
+      </compatibility>
+      <logo image="images/WhiteSourcePluginLogo.png"/>
+      <banner image="images/WhiteSourceBanner.png"/>
+      <highlights>
+      
+        <!-- <highlight image="images/freestyle -policy.PNG" cropped="images/freestyle-policy.PNG"/>
+        <highlight image="images/05_highlight2_ss.jpg" cropped="images/06_highlight2_cropped.jpg"/>
+        <highlight image="images/07_highlight3_ss.jpg" cropped="images/08_highlight3_cropped.jpg"/> -->
+        
+         <highlight image="images/freestyle-policy.PNG" cropped="images/freestyle-policy.PNG"/>
+        <highlight image="images/freestyle.PNG" cropped="images/freestyle.PNG"/>
+        <highlight image="images/maven.PNG" cropped="images/maven.PNG"/>
+        
+      </highlights>
+      <screenshots>
+        <!-- <screenshot image="images/09_addl_ss1.jpg"/>
+        <screenshot image="images/10_addl_ss2.jpg"/>
+        <screenshot image="images/11_addl_ss3.jpg"/> -->
+      </screenshots>
+</atlassian-plugin-marketing>
