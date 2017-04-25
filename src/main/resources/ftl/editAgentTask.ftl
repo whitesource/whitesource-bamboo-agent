@@ -14,10 +14,12 @@
 	[@ww.radio labelKey="org.whitesource.bamboo.plugins.projectType" name="projectType" list="projectTypes" toggle="true"/]
 	</div>
 	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.checkPolicies" name="checkPolicies"/]
+	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.forceUpdate" name="forceUpdate"/]
 [#elseif mode == "edit"]
 	[@ww.textfield labelKey="org.whitesource.bamboo.plugins.apiKey" name="apiKey" cssClass="long-field" required='true'/]
 	[@ww.label labelKey="org.whitesource.bamboo.plugins.projectType" name="projectType"/]
 	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.checkPolicies" name="checkPolicies"/]
+	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.forceUpdate" name="forceUpdate"/]
 	[@ww.hidden  name="projectTypeForValidation" value="${projectType}"/]
 [/#if]
 [@ww.textfield labelKey="org.whitesource.bamboo.plugins.wssUrl" name="wss.url" cssClass="long-field" required='false'/]

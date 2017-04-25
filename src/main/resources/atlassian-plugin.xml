@@ -23,8 +23,8 @@
     </web-resource>
     
     <!-- publish components -->
-    <taskType key="agentTask" name="White Source Agent" class="org.whitesource.bamboo.plugin.task.AgentTask">
-      <description>Update White Source OSS inventory.</description>
+    <taskType key="agentTask" name="WhiteSource Agent" class="org.whitesource.bamboo.plugin.task.AgentTask">
+      <description>Update WhiteSource OSS inventory.</description>
       <category name="deployment" />
       <category name="test" />
       <configuration class="org.whitesource.bamboo.plugin.task.AgentTaskConfigurator"/>

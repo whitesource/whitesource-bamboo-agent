@@ -15,7 +15,8 @@ public class Constants {
 	
 	public static final String API_KEY = "apiKey";
 	public static final String CHECK_POLICIES = "checkPolicies";
-	
+	public static final String FORCE_UPDATE = "forceUpdate";
+
 	public static final String PROJECT_TYPE = "projectType";
 	public static final String PROJECT_TYPES = "projectTypes";
 	public static final String PRODUCT_TOKEN = "productToken";
@@ -36,7 +37,7 @@ public class Constants {
     
 	public static final Set<String> FIELD_COLLECTION = ImmutableSet
 	        .<String> builder()
-	        .add(API_KEY, CHECK_POLICIES, PROJECT_TYPE, PRODUCT_TOKEN,PROJECT_TOKEN, PRODUCT_VERSION,MODULE_TOKENS, MODULES_INCLUDE_PATTERN,
+	        .add(API_KEY, CHECK_POLICIES, FORCE_UPDATE, PROJECT_TYPE, PRODUCT_TOKEN,PROJECT_TOKEN, PRODUCT_VERSION,MODULE_TOKENS, MODULES_INCLUDE_PATTERN,
 	                MODULES_EXCLUDE_PATTERN, FILES_INCLUDE_PATTERN, FILES_EXCLUDE_PATTERN, IGNORE_POM,SERVICE_URL_KEYWORD).build();
 	public static final String GENERIC_TYPE = "Freestyle";
 	public static final String MAVEN_TYPE = "Maven";
