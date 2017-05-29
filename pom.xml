@@ -157,7 +157,7 @@
             <artifactId>whitesource-maven-plugin</artifactId>
             <version>3.2.5</version>
             <configuration>
-              <orgToken>${env.WSS_API_KEY}</orgToken>
+              <orgToken>${whitesource.orgToken}</orgToken>
             </configuration>
             <executions>
               <execution>
