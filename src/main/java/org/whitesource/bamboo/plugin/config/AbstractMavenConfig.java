@@ -6,11 +6,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.atlassian.bamboo.v2.build.agent.capability.CapabilityDefaultsHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import com.atlassian.bamboo.build.Job;
 import com.atlassian.bamboo.process.EnvironmentVariableAccessor;
 import com.atlassian.bamboo.task.TaskConfigConstants;
 import com.atlassian.bamboo.task.TaskContext;
@@ -21,10 +21,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.whitesource.bamboo.plugin.freestyle.WssUtils;
+
 
 public abstract class AbstractMavenConfig {
 	private static final Logger log = Logger.getLogger(AbstractMavenConfig.class);
 	private static final String CFG_ENVIRONMENT_VARIABLES = TaskConfigConstants.CFG_ENVIRONMENT_VARIABLES;
+	private static final String LOG_COMPONENT = "AbstractMavenConfig";
 
 	private static final String CFG_PROJECT_FILENAME = TaskConfigConstants.CFG_PROJECT_FILENAME;
 	public static final String CFG_USE_MAVEN_RETURN_CODE = "useMavenReturnCode";
@@ -38,22 +41,34 @@ public abstract class AbstractMavenConfig {
 	protected String builderPath;
 
 	public AbstractMavenConfig(@NotNull TaskContext taskContext, @NotNull CapabilityContext capabilityContext,
-			@NotNull EnvironmentVariableAccessor environmentVariableAccessor, @NotNull String capabilityPrefix,
-			@NotNull String executableName) {
+							   @NotNull EnvironmentVariableAccessor environmentVariableAccessor, @NotNull String capabilityPrefix,
+							   @NotNull String mvn2OrMvn3, @NotNull String executableName, Map<String, String> bambooSystemProperties) {
+		String finalCapabilityPrefix = CapabilityDefaultsHelper.CAPABILITY_BUILDER_PREFIX != null ? capabilityPrefix :
+				bambooSystemProperties.get(CapabilityDefaultsHelper.CAPABILITY_BUILDER_PREFIX) != null ?
+						bambooSystemProperties.get(CapabilityDefaultsHelper.CAPABILITY_BUILDER_PREFIX) + mvn2OrMvn3 : null ;
 
 		this.executableName = executableName;
-		final String builderLabel = Preconditions
-				.checkNotNull(
-						taskContext.getBuildContext().getBuildDefinition().getTaskDefinitions().get(1)
-								.getConfiguration().get(TaskConfigConstants.CFG_BUILDER_LABEL),
-						"Builder label is not defined");
-		builderPath = Preconditions.checkNotNull(
-				capabilityContext.getCapabilityValue(capabilityPrefix + "." + builderLabel),
-				"Builder path is not defined");
-//		final String environmentVariables = taskContext.getBuildContext().getBuildDefinition().getTaskDefinitions()
-//				.get(1).getConfiguration().get(CFG_ENVIRONMENT_VARIABLES);
-		final String environmentVariables = findMavenTask(taskContext).getConfiguration().get(CFG_ENVIRONMENT_VARIABLES);
-		//final String environmentVariables = StringUtils.defaultString(taskContext.getConfigurationMap().get(CFG_ENVIRONMENT_VARIABLES));
+		String buildLabel = null;
+		if (bambooSystemProperties.get(TaskConfigConstants.CFG_BUILDER_LABEL) == null) {
+			buildLabel = Preconditions.checkNotNull(
+					taskContext.getBuildContext().getBuildDefinition().getTaskDefinitions().get(1)
+							.getConfiguration().get(TaskConfigConstants.CFG_BUILDER_LABEL),
+					"Builder label is not defined, fill {} = label_value in Bamboo system properties field",
+					TaskConfigConstants.CFG_BUILDER_LABEL);
+		} else {
+			buildLabel = bambooSystemProperties.get(TaskConfigConstants.CFG_BUILDER_LABEL);
+		}
+		final String builderLabel = buildLabel;
+
+		builderPath = Preconditions.checkNotNull(capabilityContext.getCapabilityValue(finalCapabilityPrefix + "." + builderLabel),
+				"Builder path is not defined, fill {} = {} value in Bamboo system properties field",
+				capabilityPrefix, capabilityPrefix);
+		final String environmentVariables = bambooSystemProperties.get(CFG_ENVIRONMENT_VARIABLES) == null ?
+				findMavenTask(taskContext).getConfiguration().get(CFG_ENVIRONMENT_VARIABLES) : bambooSystemProperties.get(CFG_ENVIRONMENT_VARIABLES);
+		if (environmentVariables == null) {
+			log.warn(WssUtils.logMsg(LOG_COMPONENT, CFG_ENVIRONMENT_VARIABLES +
+					" is an optional field, make sure to fill it in bamboo system properties field if necessary"));
+		}
 
 		final String projectFilename = taskContext.getConfigurationMap().get(CFG_PROJECT_FILENAME);
 		workingDirectory = taskContext.getWorkingDirectory();
@@ -85,7 +100,6 @@ public abstract class AbstractMavenConfig {
 	
 	
 	public static TaskDefinition findMavenTask(TaskContext taskContext) {
-		
 		List<TaskDefinition> taskDefinations = taskContext.getBuildContext().getBuildDefinition().getTaskDefinitions();
 		TaskDefinition 	mavenTask;
 			mavenTask = Iterables.find(taskDefinations, new Predicate<TaskDefinition> () {

@@ -102,17 +102,17 @@ public class AgentTask implements TaskType {
 		TaskResultBuilder taskResultBuilder = TaskResultBuilder.newBuilder(taskContext);
 
 		validateVariableSubstitution(buildLogger, taskResultBuilder, configurationMap);
-
+		final Map<String, String> bambooSystemProperties = splitParametersMap(configurationMap.get(BAMBOO_SYSTEM_PROPERTIES));
 		if (MAVEN_TYPE.equals(projectType)) {
 
 			List<TaskDefinition> taskDefs = taskContext.getBuildContext().getBuildDefinition().getTaskDefinitions();
 
 			if (Iterables.any(taskDefs, BambooPredicates
 					.isTaskDefinitionPluginKeyEqual("com.atlassian.bamboo.plugins.maven:task.builder.mvn2"))) {
-				config = new Maven2Config(taskContext, capabilityContext, environmentVariableAccessor);
+				config = new Maven2Config(taskContext, capabilityContext, environmentVariableAccessor, bambooSystemProperties);
 			} else if (Iterables.any(taskDefs, BambooPredicates
 					.isTaskDefinitionPluginKeyEqual("com.atlassian.bamboo.plugins.maven:task.builder.mvn3"))) {
-				config = new Maven3Config(taskContext, capabilityContext, environmentVariableAccessor);
+				config = new Maven3Config(taskContext, capabilityContext, environmentVariableAccessor, bambooSystemProperties);
 			}
 			
 			buildLogger.addBuildLogEntry("Updating WhiteSource...");
@@ -197,7 +197,6 @@ public class AgentTask implements TaskType {
 				}
 			}
 		}
-
 		return params;
 	}
 
@@ -214,7 +213,7 @@ public class AgentTask implements TaskType {
 
 			final String wssUrl = configurationMap.get(SERVICE_URL_KEYWORD);
 
-			WhitesourceService service = WssUtils.createServiceClient(wssUrl);
+			WhitesourceService service = WssUtils.createServiceClient(wssUrl, configurationMap);
 			try {
 				final String apiKey = configurationMap.get(API_KEY);
 				String productTokenOrName = configurationMap.get(PRODUCT_TOKEN);
@@ -419,7 +418,6 @@ public class AgentTask implements TaskType {
 			ignorePOMParam.append("-D").append("org.whitesource.ignorePOM").append("=").append(ignorePOM);
 			paramsList.add(ignorePOMParam.toString());
 		}
-
 		return paramsList;
 	}
 

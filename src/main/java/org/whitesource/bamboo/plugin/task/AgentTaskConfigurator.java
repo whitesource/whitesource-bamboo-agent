@@ -1,21 +1,5 @@
 package org.whitesource.bamboo.plugin.task;
 
-import static org.whitesource.bamboo.plugin.Constants.API_KEY;
-import static org.whitesource.bamboo.plugin.Constants.CTX_MAVEN_JOB;
-import static org.whitesource.bamboo.plugin.Constants.CTX_PLAN;
-import static org.whitesource.bamboo.plugin.Constants.DEFAULT_IGNORE_POM;
-import static org.whitesource.bamboo.plugin.Constants.DEFAULT_SERVICE_URL;
-import static org.whitesource.bamboo.plugin.Constants.DEFAULT_TYPE;
-import static org.whitesource.bamboo.plugin.Constants.FIELD_COLLECTION;
-import static org.whitesource.bamboo.plugin.Constants.FILES_INCLUDE_PATTERN;
-import static org.whitesource.bamboo.plugin.Constants.GENERIC_TYPE;
-import static org.whitesource.bamboo.plugin.Constants.IGNORE_POM;
-import static org.whitesource.bamboo.plugin.Constants.MAVEN_TYPE;
-import static org.whitesource.bamboo.plugin.Constants.PROJECT_TYPE;
-import static org.whitesource.bamboo.plugin.Constants.PROJECT_TYPES;
-import static org.whitesource.bamboo.plugin.Constants.SERVICE_URL_KEYWORD;
-import static org.whitesource.bamboo.plugin.Constants.TYPE_MAP;
-
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +20,8 @@ import com.atlassian.bamboo.utils.BambooPredicates;
 import com.atlassian.bamboo.utils.error.ErrorCollection;
 import com.atlassian.bamboo.v2.build.agent.capability.Requirement;
 import com.google.common.collect.Iterables;
+
+import static org.whitesource.bamboo.plugin.Constants.*;
 
 public class AgentTaskConfigurator extends AbstractTaskConfigurator implements TaskRequirementSupport {
 	
@@ -58,7 +44,7 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator implements T
 	
 	@Override
 	public void validate(@NotNull final ActionParametersMap params, @NotNull final ErrorCollection errorCollection){
-	    super.validate(params, errorCollection);
+	    super. validate(params, errorCollection);
 	  
 	    final String apiKey = params.getString(API_KEY);
 	    final String includePattern = params.getString(FILES_INCLUDE_PATTERN);
@@ -67,11 +53,22 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator implements T
 	    }
 	    
 	    // for edit case we projectTypeForValidation, as there is a problem with the ui.bambooSection tag.
-	    String projectType = params.getString(PROJECT_TYPE)!=null?params.getString(PROJECT_TYPE):params.getString("projectTypeForValidation");
+	    String projectType = params.getString(PROJECT_TYPE)!=null ? params.getString(PROJECT_TYPE): params.getString("projectTypeForValidation");
 	   
 	    if (StringUtils.isEmpty(includePattern) && projectType!=null && projectType.equalsIgnoreCase(GENERIC_TYPE)){
 	    	errorCollection.addError(FILES_INCLUDE_PATTERN, "Field can't be empty.");
 	    }
+	    //Check proxy settings field by user
+		if (params.getBoolean(PROXY_SETTINGS)) {
+	    	if (params.getString(PROXY_PORT) == null || params.getString(PROXY_HOST) == null) {
+				errorCollection.addError(PROXY_PORT, PROXY_HOST, "Proxy Port and Proxy Host must be not null");
+			}
+	    	try {
+				int port = Integer.parseInt(params.getString(PROXY_PORT));
+			} catch (Exception e) {
+				errorCollection.addError(PROXY_PORT, "Proxy port must be integer");
+			}
+		}
 	}
 	
 	@Override
