@@ -1,15 +1,12 @@
 package org.whitesource.bamboo.plugin.config;
 
-import com.atlassian.bamboo.task.TaskConfigConstants;
-import com.google.common.base.Preconditions;
-import org.apache.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
-
 import com.atlassian.bamboo.process.EnvironmentVariableAccessor;
 import com.atlassian.bamboo.task.TaskContext;
 import com.atlassian.bamboo.v2.build.agent.capability.CapabilityContext;
 import com.atlassian.bamboo.v2.build.agent.capability.CapabilityDefaultsHelper;
 import com.atlassian.bamboo.v2.build.agent.capability.ExecutablePathUtils;
+import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 

@@ -11,29 +11,28 @@ import static org.whitesource.bamboo.plugin.Constants.*;
 import com.atlassian.bamboo.configuration.ConfigurationMap;
 import org.whitesource.agent.client.WhitesourceService;
 
-public final class WssUtils
-{
+public final class WssUtils {
     /* --- Static members --- */
 
     //private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|$", Pattern.MULTILINE);
-	private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|\\s+");
-	private static final Pattern KEY_VALUE_SPLIT_PATTERN = Pattern.compile("=");
+    private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|\\s+");
+    private static final Pattern KEY_VALUE_SPLIT_PATTERN = Pattern.compile("=");
 
     /* --- Public methods --- */
 
-    public static WhitesourceService createServiceClient(String wssUrl, ConfigurationMap configurationMap){
-    	 WhitesourceService service;
-    	 
-        if (wssUrl!=null) {
-        	service = new WhitesourceService(AGENT_TYPE, AGENT_VERSION, wssUrl);
+    public static WhitesourceService createServiceClient(String wssUrl, ConfigurationMap configurationMap) {
+        WhitesourceService service;
+
+        if (wssUrl != null) {
+            service = new WhitesourceService(AGENT_TYPE, AGENT_VERSION, wssUrl);
         } else {
-        	service = new WhitesourceService(AGENT_TYPE, AGENT_VERSION, DEFAULT_SERVICE_URL);
+            service = new WhitesourceService(AGENT_TYPE, AGENT_VERSION, DEFAULT_SERVICE_URL);
         }
 
         // Fill proxy settings by user if set, else check if proxy settings are configured by default on the bamboo server.
         boolean isProxySettings = configurationMap.getAsBoolean(PROXY_SETTINGS);
         if (isProxySettings) {
-            service.getClient().setProxy( configurationMap.get(PROXY_HOST), Integer.parseInt(configurationMap.get(PROXY_PORT)),
+            service.getClient().setProxy(configurationMap.get(PROXY_HOST), Integer.parseInt(configurationMap.get(PROXY_PORT)),
                     configurationMap.get(PROXY_USER_NAME), configurationMap.get(PROXY_PASSWORD));
         } else {
             // Reuse hosting application proxy settings, if any (see https://confluence.atlassian.com/x/nAFgDQ for the
@@ -57,8 +56,7 @@ public final class WssUtils
         return service;
     }
 
-    public static String logMsg(String component, String msg)
-    {
+    public static String logMsg(String component, String msg) {
         return "[whitesource]::" + component + ": " + msg;
     }
 
