@@ -52,6 +52,7 @@ public class AgentTask implements TaskType {
     private static final String EQUALS_SIGN = "=";
     private static final int DEFAULT_CONNECTION_DELAY_TIME = 3000;
     private static final Integer DEFAULT_CONNECTION_RETRIES = 1;
+    public static final String MAVEN_D_PARAMETER = "-D";
 
     /* --- Members --- */
 
@@ -80,7 +81,8 @@ public class AgentTask implements TaskType {
         final BuildLogger buildLogger = taskContext.getBuildLogger();
         final ConfigurationMap configurationMap = taskContext.getConfigurationMap();
         final String projectType = configurationMap.get(PROJECT_TYPE);
-        connectionRetries = getConnectionRetries(configurationMap.get(CONNECTION_RETRIES), buildLogger);
+        connectionRetries = configurationMap.getAsBoolean(FAIL_ON_CONNECTION_ERROR) ?
+                getConnectionRetries(configurationMap.get(CONNECTION_RETRIES), buildLogger) : DEFAULT_CONNECTION_RETRIES;
         TaskResultBuilder taskResultBuilder = TaskResultBuilder.newBuilder(taskContext);
 
         validateVariableSubstitution(buildLogger, taskResultBuilder, configurationMap);
@@ -241,10 +243,10 @@ public class AgentTask implements TaskType {
 
             } catch (WssServiceException e) {
                 buildLogger.addErrorLogEntry("Communication with WhiteSource failed: " + e.getMessage());
-                boolean connectionError = e.getMessage().contains(Constants.ERROR_CONNECTION_REFUSED);
-                if (connectionError) {
+                if (isConnectionError(e)) {
+                    // try to re-connect
                     if (connectionRetries-- > 0) {
-                        buildLogger.addBuildLogEntry("Attempting to reconnect with WhiteSource");
+                        buildLogger.addBuildLogEntry("Attempting to reconnect to WhiteSource");
                         try {
                             Thread.sleep(DEFAULT_CONNECTION_DELAY_TIME);
                         } catch (InterruptedException e1) {
@@ -253,10 +255,11 @@ public class AgentTask implements TaskType {
                         return updateOssInventory(buildLogger, taskResultBuilder, configurationMap, buildContext, buildDirectory, projectInfos);
                     } else {
                         if (configurationMap.getAsBoolean(FAIL_ON_CONNECTION_ERROR)) {
-                            taskResult = taskResultBuilder.failedWithError().build();
-                            buildLogger.addErrorLogEntry("Stopping build.");
+                            taskResult = handleError(buildLogger, taskResultBuilder);
                         }
                     }
+                } else if (configurationMap.getAsBoolean(FAIL_ON_ERROR)) {
+                    taskResult = handleError(buildLogger, taskResultBuilder);
                 }
             } catch (IOException e) {
                 buildLogger.addErrorLogEntry("Generating policy check report failed.", e);
@@ -266,6 +269,17 @@ public class AgentTask implements TaskType {
             }
         }
 
+        return taskResult;
+    }
+
+    private boolean isConnectionError(WssServiceException e) {
+        // checks if a network error
+        return e.getCause() != null && e.getCause().getClass().getCanonicalName().startsWith(Constants.JAVA_NETWORK_EXCEPTION);
+    }
+
+    private TaskResult handleError(BuildLogger buildLogger, TaskResultBuilder taskResultBuilder) {
+        TaskResult taskResult = taskResultBuilder.failedWithError().build();
+        buildLogger.addErrorLogEntry("Stopping build.");
         return taskResult;
     }
 
@@ -352,7 +366,7 @@ public class AgentTask implements TaskType {
         StringBuilder productTokenParam = new StringBuilder();
 
         if (StringUtils.isNotBlank(productToken)) {
-            productTokenParam.append("-D").append("org.whitesource.product").append("=").append(productToken);
+            productTokenParam.append("-D").append("org.whitesource.product").append(EQUALS_SIGN).append(productToken);
             paramsList.add(productTokenParam.toString());
         }
 
@@ -360,7 +374,7 @@ public class AgentTask implements TaskType {
         StringBuilder productVersionParam = new StringBuilder();
 
         if (StringUtils.isNotBlank(productVersion)) {
-            productVersionParam.append("-D").append("org.whitesource.productVersion").append("=").append(productVersion);
+            productVersionParam.append("-D").append("org.whitesource.productVersion").append(EQUALS_SIGN).append(productVersion);
             paramsList.add(productVersionParam.toString());
         }
 
@@ -368,7 +382,7 @@ public class AgentTask implements TaskType {
         StringBuilder projectTokenParam = new StringBuilder();
 
         if (StringUtils.isNotBlank(projectToken)) {
-            projectTokenParam.append("-D").append("org.whitesource.projectToken").append("=").append(projectToken);
+            projectTokenParam.append("-D").append("org.whitesource.projectToken").append(EQUALS_SIGN).append(projectToken);
             paramsList.add(projectTokenParam.toString());
         }
 
@@ -378,7 +392,7 @@ public class AgentTask implements TaskType {
         if (StringUtils.isNotBlank(moduleTokensString)) {
 
             moduleTokens = splitParametersMap(moduleTokensString);
-            moduleTokensParam.append("-D").append("org.whitesource.moduleTokens").append("=").append(moduleTokens);
+            moduleTokensParam.append("-D").append("org.whitesource.moduleTokens").append(EQUALS_SIGN).append(moduleTokens);
             // TODO convert into key1=value1,key2=value2
             paramsList.add(moduleTokensParam.toString());
         }
@@ -390,7 +404,7 @@ public class AgentTask implements TaskType {
 
             includes = splitParameters(moduleIncTokens);
 
-            modulesIncludePatternParam.append("-D").append("org.whitesource.includes").append("=")
+            modulesIncludePatternParam.append("-D").append("org.whitesource.includes").append(EQUALS_SIGN)
                     .append(moduleIncTokens);
             // TODO convert into value1,value2,
             paramsList.add(modulesIncludePatternParam.toString());
@@ -403,7 +417,7 @@ public class AgentTask implements TaskType {
 
             exclude = splitParameters(moduleIncTokens);
 
-            modulesExcludePatternParam.append("-D").append("org.whitesource.excludes").append("=")
+            modulesExcludePatternParam.append("-D").append("org.whitesource.excludes").append(EQUALS_SIGN)
                     .append(moduleExcTokens);
             // TODO convert into value1,value2,
             paramsList.add(modulesExcludePatternParam.toString());
@@ -413,7 +427,7 @@ public class AgentTask implements TaskType {
         StringBuilder ignorePOMParam = new StringBuilder();
 
         if (StringUtils.isNotBlank(ignorePOM) && ignorePOM.equalsIgnoreCase("true")) {
-            ignorePOMParam.append("-D").append("org.whitesource.ignorePOM").append("=").append(ignorePOM);
+            ignorePOMParam.append("-D").append("org.whitesource.ignorePOM").append(EQUALS_SIGN).append(ignorePOM);
             paramsList.add(ignorePOMParam.toString());
         }
         return paramsList;
@@ -437,19 +451,22 @@ public class AgentTask implements TaskType {
         StringBuilder wssUrlParam = new StringBuilder();
 
         if (StringUtils.isNotBlank(wssUrl)) {
-            wssUrlParam.append("-D").append(SERVICE_URL_KEYWORD).append("=").append(wssUrl);
+            wssUrlParam.append(MAVEN_D_PARAMETER).append(SERVICE_URL_KEYWORD).append(EQUALS_SIGN).append(wssUrl);
             mavenCmd.add(wssUrlParam.toString());
         }
 
         final String apiKey = configurationMap.get(API_KEY);
         StringBuilder confParam = new StringBuilder();
-        confParam.append("-D").append("org.whitesource.orgToken").append("=").append(apiKey);
+        confParam.append(MAVEN_D_PARAMETER).append("org.whitesource.orgToken").append(EQUALS_SIGN).append(apiKey);
+        StringBuilder failOnErrorParam = new StringBuilder();
+        failOnErrorParam.append(MAVEN_D_PARAMETER).append("org.whitesource.failOnError").append(EQUALS_SIGN).append(configurationMap.getAsBoolean(FAIL_ON_ERROR));
         StringBuilder failOnConnectionErrorParam = new StringBuilder();
-        failOnConnectionErrorParam.append("-D").append("org.whitesource.failOnConnectionError").append(EQUALS_SIGN).append(configurationMap.getAsBoolean(FAIL_ON_CONNECTION_ERROR));
+        failOnConnectionErrorParam.append(MAVEN_D_PARAMETER).append("org.whitesource.failOnConnectionError").append(EQUALS_SIGN).append(configurationMap.getAsBoolean(FAIL_ON_CONNECTION_ERROR));
         StringBuilder connectionRetriesParam = new StringBuilder();
-        connectionRetriesParam.append("-D").append("org.whitesource.connectionRetries").append(EQUALS_SIGN).append(String.valueOf(connectionRetries));
+        connectionRetriesParam.append(MAVEN_D_PARAMETER).append("org.whitesource.connectionRetries").append(EQUALS_SIGN).append(String.valueOf(connectionRetries));
 
         mavenCmd.add(confParam.toString());
+        mavenCmd.add(failOnErrorParam.toString());
         mavenCmd.add(failOnConnectionErrorParam.toString());
         mavenCmd.add(connectionRetriesParam.toString());
         mavenCmd.addAll(populateaParams(taskContext));
@@ -457,14 +474,14 @@ public class AgentTask implements TaskType {
         // we will do check policies only for FAIL_CHECK_POLICIES case.
         if (checkPolicies) {
             StringBuilder checkPolicyParam = new StringBuilder();
-            checkPolicyParam.append("-D").append("org.whitesource.checkPolicies").append("=").append(true);
+            checkPolicyParam.append(MAVEN_D_PARAMETER).append("org.whitesource.checkPolicies").append(EQUALS_SIGN).append(true);
             mavenCmd.add(checkPolicyParam.toString());
             StringBuilder forceCheckParam = new StringBuilder();
-            forceCheckParam.append("-D").append("org.whitesource.forceCheckAllDependencies").append("=").append(true);
+            forceCheckParam.append(MAVEN_D_PARAMETER).append("org.whitesource.forceCheckAllDependencies").append(EQUALS_SIGN).append(true);
             mavenCmd.add(forceCheckParam.toString());
             StringBuilder forceUpdateParam = new StringBuilder();
             if (forceUpdate) {
-                forceUpdateParam.append("-D").append("org.whitesource.forceUpdate").append("=").append(true);
+                forceUpdateParam.append(MAVEN_D_PARAMETER).append("org.whitesource.forceUpdate").append(EQUALS_SIGN).append(true);
                 mavenCmd.add(forceUpdateParam.toString());
             }
             buildSuccessMatcher = new StringMatchingInterceptor(BUILD_SUCCESSFUL_MARKER_CHECKPOLICIES,

@@ -27,6 +27,7 @@ public class Constants {
 	public static final String MODULES_EXCLUDE_PATTERN = "modulesExcludePattern";
 	public static final String FILES_INCLUDE_PATTERN = "filesIncludePattern";
 	public static final String FILES_EXCLUDE_PATTERN = "filesExcludePattern";
+	public static final String FAIL_ON_ERROR = "failOnError";
 	public static final String FAIL_ON_CONNECTION_ERROR = "failOnConnectionError";
 	public static final String CONNECTION_RETRIES = "connectionRetries";
 	public static final String PROXY_SETTINGS = "proxySettings";
@@ -46,7 +47,7 @@ public class Constants {
 	public static final Set<String> FIELD_COLLECTION = ImmutableSet
 	        .<String> builder()
 	        .add(API_KEY, CHECK_POLICIES, FORCE_UPDATE, PROJECT_TYPE, PRODUCT_TOKEN,PROJECT_TOKEN, PRODUCT_VERSION,MODULE_TOKENS, MODULES_INCLUDE_PATTERN,
-	                MODULES_EXCLUDE_PATTERN, FILES_INCLUDE_PATTERN, FAIL_ON_CONNECTION_ERROR, CONNECTION_RETRIES, FILES_EXCLUDE_PATTERN, IGNORE_POM,SERVICE_URL_KEYWORD, PROXY_SETTINGS,
+	                MODULES_EXCLUDE_PATTERN, FILES_INCLUDE_PATTERN, FAIL_ON_ERROR, FAIL_ON_CONNECTION_ERROR, CONNECTION_RETRIES, FILES_EXCLUDE_PATTERN, IGNORE_POM,SERVICE_URL_KEYWORD, PROXY_SETTINGS,
 					PROXY_PORT, PROXY_HOST, PROXY_PASSWORD, PROXY_USER_NAME, BAMBOO_SYSTEM_PROPERTIES).build();
 	public static final String GENERIC_TYPE = "Freestyle";
 	public static final String MAVEN_TYPE = "Maven";
@@ -69,8 +70,6 @@ public class Constants {
 
 	/* --- Errors --- */
 
-	public static final String ERROR_CONNECTION_REFUSED = "Connection refused: ";
-	
-
+	public static final String JAVA_NETWORK_EXCEPTION = "java.net";
 
 }
