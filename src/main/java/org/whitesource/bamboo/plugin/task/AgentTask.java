@@ -152,7 +152,7 @@ public class AgentTask implements TaskType {
                                               final Map<String, String> configurationMap) {
         buildLogger.addBuildLogEntry("WhiteSource configuration:");
         for (Entry<String, String> variable : configurationMap.entrySet()) {
-            final String value = variable.getKey().equals(API_KEY) ? "********" : variable.getValue();
+            final String value = variable.getKey().equals(API_KEY) || variable.getKey().equals(PROXY_PASSWORD)? "********" : variable.getValue();
 
             buildLogger.addBuildLogEntry("... " + variable.getKey() + " is '" + value + "'");
             if (!isSubstitutionValid(value)) {
