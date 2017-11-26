@@ -142,7 +142,6 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor {
 				}
 				glob = "glob:"+startingDir+"/"+pattern;
 			}
-
 			final PathMatcher excludePathMatcher = FileSystems.getDefault().getPathMatcher(glob);
 				if (excludePathMatcher.matches(path)) {
 					exFlag = true;
