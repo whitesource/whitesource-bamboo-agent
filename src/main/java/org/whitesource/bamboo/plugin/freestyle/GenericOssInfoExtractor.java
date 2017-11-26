@@ -153,7 +153,6 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor {
 					break;
 				}
 			}
-		
 		return exFlag;
 	}
 
