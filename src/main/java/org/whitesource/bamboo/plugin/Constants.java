@@ -36,11 +36,14 @@ public class Constants {
 	public static final String PROXY_USER_NAME = "proxyUserName";
 	public static final String PROXY_PASSWORD = "proxyUserPassword";
 	public static final String BAMBOO_SYSTEM_PROPERTIES = "bambooSystemProperties";
+	public static final int DEFAULT_CONNECTION_TIMEOUT_MINUTES = 60;
+
+	public static final String VERSION = "version";
 
 	public static final String IGNORE_POM = "ignorePOM";
 	
 	public static final String AGENT_TYPE = "bamboo";
-    public static final String AGENT_VERSION = "2.0";
+    public static final String AGENT_VERSION = "agentsVersion";
     public static final String SERVICE_URL_KEYWORD = "wss.url";
     public static final String DEFAULT_SERVICE_URL = "https://saas.whitesourcesoftware.com/agent";
     

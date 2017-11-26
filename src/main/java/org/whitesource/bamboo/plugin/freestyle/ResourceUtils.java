@@ -28,7 +28,6 @@ public class ResourceUtils
      */
     public static String getRelativePath(String targetPath, String basePath, String pathSeparator) {
         // @todo: replace StringBuffer with StringBuilder throughout this function!
-
         // Normalize the paths
         String normalizedTargetPath = FilenameUtils.normalizeNoEndSeparator(targetPath);
         String normalizedBasePath = FilenameUtils.normalizeNoEndSeparator(basePath);
