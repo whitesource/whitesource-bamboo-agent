@@ -26,8 +26,7 @@ public class ResourceUtils
      *            running on Windows (for example)
      * @return
      */
-    public static String getRelativePath(String targetPath, String basePath, String pathSeparator)
-    {
+    public static String getRelativePath(String targetPath, String basePath, String pathSeparator) {
         // @todo: replace StringBuffer with StringBuilder throughout this function!
 
         // Normalize the paths
