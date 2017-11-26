@@ -1,27 +1,23 @@
 
 package org.whitesource.bamboo.plugin.freestyle;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
-import org.whitesource.agent.api.ChecksumUtils;
 import org.whitesource.agent.api.model.AgentProjectInfo;
+import org.whitesource.agent.api.model.ChecksumType;
 import org.whitesource.agent.api.model.Coordinates;
 import org.whitesource.agent.api.model.DependencyInfo;
+import org.whitesource.agent.hash.ChecksumUtils;
+import org.whitesource.agent.hash.HashCalculator;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
 
 public class GenericOssInfoExtractor extends BaseOssInfoExtractor {
 	private static final String LOG_COMPONENT = "GenericExtractor";
+	private static final String JAVA_SCRIPT_REGEX = ".*\\.js";
 
 	protected String projectName;
 	protected List<String> includePatterns;
@@ -165,10 +161,27 @@ public class GenericOssInfoExtractor extends BaseOssInfoExtractor {
 
 		try {
 			dependencyInfo.setSha1(ChecksumUtils.calculateSHA1(file));
+			if (file.getName().toLowerCase().matches(JAVA_SCRIPT_REGEX)) {
+				Map<ChecksumType, String> javaScriptChecksums = new HashMap<>();
+				try {
+					javaScriptChecksums = new HashCalculator().calculateJavaScriptHashes(file);
+				} catch (Exception e) {
+					log.error("Failed to calculate javaScript file hash for :" + file.getName());
+					log.debug("Failed to calculate javaScript file hash for :" + e.getMessage());
+				}
+				for (Map.Entry<ChecksumType, String> entry : javaScriptChecksums.entrySet()) {
+					dependencyInfo.addChecksum(entry.getKey(), entry.getValue());
+				}
+			}
+
+			// other platform SHA1
+			ChecksumUtils.calculateOtherPlatformSha1(dependencyInfo, file);
+
+			// super hash
+			ChecksumUtils.calculateSuperHash(dependencyInfo, file);
 		} catch (IOException e) {
 			log.warn(WssUtils.logMsg(LOG_COMPONENT, ERROR_SHA1 + "for " + file.getAbsolutePath()));
 		}
-
 		return dependencyInfo;
 	}
 

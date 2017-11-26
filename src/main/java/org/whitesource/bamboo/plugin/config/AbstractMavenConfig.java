@@ -53,15 +53,14 @@ public abstract class AbstractMavenConfig {
 			buildLabel = Preconditions.checkNotNull(
 					taskContext.getBuildContext().getBuildDefinition().getTaskDefinitions().get(1)
 							.getConfiguration().get(TaskConfigConstants.CFG_BUILDER_LABEL),
-					"Builder label is not defined, fill {} = label_value in Bamboo system properties field",
-					TaskConfigConstants.CFG_BUILDER_LABEL);
+					"Builder label is not defined, fill " + TaskConfigConstants.CFG_BUILDER_LABEL + " label_value in Bamboo system properties field");
 		} else {
 			buildLabel = bambooSystemProperties.get(TaskConfigConstants.CFG_BUILDER_LABEL);
 		}
 		final String builderLabel = buildLabel;
 
 		builderPath = Preconditions.checkNotNull(capabilityContext.getCapabilityValue(finalCapabilityPrefix + "." + builderLabel),
-				"Builder path is not defined, fill {} = {} value in Bamboo system properties field",
+				"Builder path is not defined, fill " + capabilityPrefix + " = " + " capability prefix value in Bamboo system properties field",
 				capabilityPrefix, capabilityPrefix);
 		final String environmentVariables = bambooSystemProperties.get(CFG_ENVIRONMENT_VARIABLES) == null ?
 				findMavenTask(taskContext).getConfiguration().get(CFG_ENVIRONMENT_VARIABLES) : bambooSystemProperties.get(CFG_ENVIRONMENT_VARIABLES);

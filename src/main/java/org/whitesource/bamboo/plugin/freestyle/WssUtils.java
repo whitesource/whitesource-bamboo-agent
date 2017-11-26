@@ -1,15 +1,20 @@
 package org.whitesource.bamboo.plugin.freestyle;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.*;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.whitesource.bamboo.plugin.Constants.*;
 
 import com.atlassian.bamboo.configuration.ConfigurationMap;
+import org.apache.commons.lang.StringUtils;
 import org.whitesource.agent.client.WhitesourceService;
+import org.whitesource.bamboo.plugin.Constants;
+import org.whitesource.bamboo.plugin.task.AgentTask;
 
 public final class WssUtils {
     /* --- Static members --- */
@@ -17,20 +22,23 @@ public final class WssUtils {
     //private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|$", Pattern.MULTILINE);
     private static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|\\s+");
     private static final Pattern KEY_VALUE_SPLIT_PATTERN = Pattern.compile("=");
+    private static final Logger log = LoggerFactory.getLogger(WssUtils.class);
 
     /* --- Public methods --- */
 
     public static WhitesourceService createServiceClient(String wssUrl, ConfigurationMap configurationMap) {
         WhitesourceService service;
 
+        boolean isProxySettings = configurationMap.getAsBoolean(PROXY_SETTINGS);
         if (wssUrl != null) {
             service = new WhitesourceService(AGENT_TYPE, AGENT_VERSION, wssUrl);
         } else {
             service = new WhitesourceService(AGENT_TYPE, AGENT_VERSION, DEFAULT_SERVICE_URL);
+            service = new WhitesourceService(AGENT_TYPE, getResource(Constants.AGENT_VERSION),
+                    getResource(Constants.VERSION), DEFAULT_SERVICE_URL, isProxySettings, Constants.DEFAULT_CONNECTION_TIMEOUT_MINUTES);
         }
 
         // Fill proxy settings by user if set, else check if proxy settings are configured by default on the bamboo server.
-        boolean isProxySettings = configurationMap.getAsBoolean(PROXY_SETTINGS);
         if (isProxySettings) {
             service.getClient().setProxy(configurationMap.get(PROXY_HOST), Integer.parseInt(configurationMap.get(PROXY_PORT)),
                     configurationMap.get(PROXY_USER_NAME), configurationMap.get(PROXY_PASSWORD));
@@ -89,5 +97,24 @@ public final class WssUtils {
             }
         }
         return params;
+    }
+
+    private static String getResource(String propertyName) {
+        Properties properties = getProperties(propertyName);
+        String val = (properties.getProperty(propertyName));
+        if(StringUtils.isNotBlank(val)){
+            return val;
+        }
+        return "";
+    }
+
+    private static Properties getProperties(String propertyName) {
+        Properties properties = new Properties();
+        try (InputStream stream = AgentTask.class.getResourceAsStream("/project.properties")) {
+            properties.load(stream);
+        } catch (IOException e) {
+            log.error("Failed to get version "+ propertyName + ",error: "+ e);
+        }
+        return properties;
     }
 }
