@@ -31,9 +31,9 @@ public final class WssUtils {
 
         boolean isProxySettings = configurationMap.getAsBoolean(PROXY_SETTINGS);
         if (wssUrl != null) {
-            service = new WhitesourceService(AGENT_TYPE, AGENT_VERSION, wssUrl);
+            service = new WhitesourceService(AGENT_TYPE, getResource(Constants.AGENT_VERSION),
+                    getResource(Constants.VERSION), wssUrl, isProxySettings, Constants.DEFAULT_CONNECTION_TIMEOUT_MINUTES);
         } else {
-            service = new WhitesourceService(AGENT_TYPE, AGENT_VERSION, DEFAULT_SERVICE_URL);
             service = new WhitesourceService(AGENT_TYPE, getResource(Constants.AGENT_VERSION),
                     getResource(Constants.VERSION), DEFAULT_SERVICE_URL, isProxySettings, Constants.DEFAULT_CONNECTION_TIMEOUT_MINUTES);
         }

@@ -1,5 +1,6 @@
 package org.whitesource.bamboo.plugin.task;
 
+import com.amazonaws.util.IOUtils;
 import com.atlassian.bamboo.build.logger.BuildLogger;
 import com.atlassian.bamboo.build.logger.interceptors.ErrorMemorisingInterceptor;
 import com.atlassian.bamboo.build.logger.interceptors.LogMemorisingInterceptor;
@@ -37,8 +38,7 @@ import org.whitesource.bamboo.plugin.freestyle.BaseOssInfoExtractor;
 import org.whitesource.bamboo.plugin.freestyle.GenericOssInfoExtractor;
 import org.whitesource.bamboo.plugin.freestyle.WssUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -53,6 +53,7 @@ public class AgentTask implements TaskType {
     private static final int DEFAULT_CONNECTION_DELAY_TIME = 3000;
     private static final Integer DEFAULT_CONNECTION_RETRIES = 1;
     public static final String MAVEN_D_PARAMETER = "-D";
+    public static final String REQUEST_TOKEN = "requestToken";
 
     /* --- Members --- */
 
@@ -123,7 +124,11 @@ public class AgentTask implements TaskType {
             buildLogger.addErrorLogEntry(CONTACT_SUPPORT);
             result = taskResultBuilder.failedWithError().build();
         }
-
+         //support token
+        String requestToken = result.getResultData().get(REQUEST_TOKEN);
+        if (StringUtils.isNotBlank(requestToken)) {
+            buildLogger.addBuildLogEntry("Support Token: " + requestToken);
+        }
         return result;
     }
 
@@ -230,6 +235,11 @@ public class AgentTask implements TaskType {
                     buildLogger.addBuildLogEntry("Not checked any policies and updating results.");
                     updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos);
                 }
+                // add support token
+                String requestToken = updateResult.getRequestToken();
+                if (StringUtils.isNotBlank(requestToken)) {
+                    taskResult.getResultData().put(REQUEST_TOKEN, requestToken);
+                }
 
                 if (updateResult == null || updateResult.getCreatedProjects().isEmpty() && updateResult.getUpdatedProjects().isEmpty()) {
                     log.error(WssUtils.logMsg(LOG_COMPONENT, "Wss create/update failed"));
@@ -268,7 +278,6 @@ public class AgentTask implements TaskType {
                 service.shutdown();
             }
         }
-
         return taskResult;
     }
 
@@ -507,7 +516,8 @@ public class AgentTask implements TaskType {
                 TaskResultBuilder taskResultBuilder = TaskResultBuilder.newBuilder(taskContext)
                         .checkReturnCode(externalProcess, 0)
                         .checkInterceptorMatches(buildSuccessMatcher, FIND_SUCCESS_MESSAGE_IN_LAST);
-                return taskResultBuilder.build();
+                TaskResult build = taskResultBuilder.build();
+                return build;
             }
             throw new TaskException("Failed to execute command, external process not completed?");
         } catch (Exception e) {

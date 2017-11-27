@@ -67,7 +67,7 @@ public class Constants {
 	public static final String BUILD_SUCCESSFUL_MARKER_CHECKPOLICIES = SystemProperty.BUILD_SUCCESSFUL_MARKER.getValue("All dependencies conform with the organization's policies.");
 	public static final boolean SEARCH_BUILD_SUCCESS_FAIL_MESSAGE_EVERYWHERE = SystemProperty.SEARCH_BUILD_SUCCESS_FAIL_MESSAGE_EVERYWHERE.getValue(false);
 	public static final int LINES_TO_PARSE_FOR_ERRORS = 200;
-	public static final int FIND_SUCCESS_MESSAGE_IN_LAST = SystemProperty.FIND_SUCCESS_MESSAGE_IN_LAST.getValue(50);
+	public static final int FIND_SUCCESS_MESSAGE_IN_LAST = SystemProperty.FIND_SUCCESS_MESSAGE_IN_LAST.getValue(80);
 	public static final Pattern PARAM_LIST_SPLIT_PATTERN = Pattern.compile(",|$", Pattern.MULTILINE);
 	public static final Pattern KEY_VALUE_SPLIT_PATTERN = Pattern.compile("=");
 
