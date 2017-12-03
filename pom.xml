@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.whitesource.bamboo.plugins</groupId>
 	<artifactId>whitesource-bamboo-agent</artifactId>
-	<version>17.11.3</version>
+	<version>17.11.4</version>
 
 	<organization>
 		<name>WhiteSource Software Ltd.</name>
