@@ -36,6 +36,7 @@ public class Constants {
 	public static final String PROXY_USER_NAME = "proxyUserName";
 	public static final String PROXY_PASSWORD = "proxyUserPassword";
 	public static final String BAMBOO_SYSTEM_PROPERTIES = "bambooSystemProperties";
+	public static final String MAVEN_PATH = "mavenPath";
 	public static final int DEFAULT_CONNECTION_TIMEOUT_MINUTES = 60;
 
 	public static final String VERSION = "version";
@@ -51,7 +52,7 @@ public class Constants {
 	        .<String> builder()
 	        .add(API_KEY, CHECK_POLICIES, FORCE_UPDATE, PROJECT_TYPE, PRODUCT_TOKEN,PROJECT_TOKEN, PRODUCT_VERSION,MODULE_TOKENS, MODULES_INCLUDE_PATTERN,
 	                MODULES_EXCLUDE_PATTERN, FILES_INCLUDE_PATTERN, FAIL_ON_ERROR, FAIL_ON_CONNECTION_ERROR, CONNECTION_RETRIES, FILES_EXCLUDE_PATTERN, IGNORE_POM,SERVICE_URL_KEYWORD, PROXY_SETTINGS,
-					PROXY_PORT, PROXY_HOST, PROXY_PASSWORD, PROXY_USER_NAME, BAMBOO_SYSTEM_PROPERTIES).build();
+					PROXY_PORT, PROXY_HOST, PROXY_PASSWORD, PROXY_USER_NAME, BAMBOO_SYSTEM_PROPERTIES, MAVEN_PATH).build();
 	public static final String GENERIC_TYPE = "Freestyle";
 	public static final String MAVEN_TYPE = "Maven";
 	public static final Map<String, String> TYPE_MAP = ImmutableMap.<String, String> builder()

@@ -55,6 +55,7 @@
 	[@ww.textfield labelKey="org.whitesource.bamboo.plugins.moduleTokens" cssClass="long-field" name="moduleTokens" required='false'/]
 	[@ww.textfield labelKey="org.whitesource.bamboo.plugins.modulesIncludePattern" name="modulesIncludePattern"  cssClass="long-field" required='false'/]
 	[@ww.textfield labelKey="org.whitesource.bamboo.plugins.modulesExcludePattern" name="modulesExcludePattern" cssClass="long-field" required='false'/]
+	[@ww.textfield labelKey="org.whitesource.bamboo.plugins.mavenPath" name="mavenPath" cssClass="long-field" required='false'/]
 	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.ignorePOM" name="ignorePOM"/]
 [/@ui.bambooSection]
 [@ui.bambooSection dependsOn='projectType' showOn='Freestyle']
