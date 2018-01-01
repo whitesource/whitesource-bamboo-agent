@@ -2,6 +2,7 @@ package org.whitesource.bamboo.plugin.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -53,11 +54,12 @@ public abstract class AbstractMavenConfig {
         final BuildLogger buildLogger = taskContext.getBuildLogger();
         String buildLabel = null;
 
+		Map<String,String> previousMavenConfiguration = findMavenTask(taskContext).getConfiguration();
+		String workingSubDirectory = previousMavenConfiguration.get(TaskConfigConstants.CFG_WORKING_SUB_DIRECTORY);
+
         try {
             if (bambooSystemProperties.get(TaskConfigConstants.CFG_BUILDER_LABEL) == null) {
-                buildLabel = Preconditions.checkNotNull(
-                        taskContext.getBuildContext().getBuildDefinition().getTaskDefinitions().get(1)
-                                .getConfiguration().get(TaskConfigConstants.CFG_BUILDER_LABEL),
+				buildLabel = Preconditions.checkNotNull(previousMavenConfiguration.get(TaskConfigConstants.CFG_BUILDER_LABEL),
                         "Builder label is not defined, fill 'Maven path' parameter in WhiteSource configuration");
             } else {
                 buildLabel = bambooSystemProperties.get(TaskConfigConstants.CFG_BUILDER_LABEL);
@@ -92,7 +94,11 @@ public abstract class AbstractMavenConfig {
         }
 
         final String projectFilename = taskContext.getConfigurationMap().get(CFG_PROJECT_FILENAME);
-        workingDirectory = taskContext.getWorkingDirectory();
+        if(StringUtils.isNotEmpty(workingSubDirectory)) {
+			workingDirectory = Paths.get(taskContext.getWorkingDirectory().getAbsolutePath(), workingSubDirectory).toFile();
+		}else {
+			workingDirectory = taskContext.getWorkingDirectory();
+		}
 
         // set commandline
         commandline.add(getMavenExecutablePath(builderPath));
