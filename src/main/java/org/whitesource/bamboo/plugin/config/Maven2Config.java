@@ -13,9 +13,9 @@ import java.util.Map;
 public class Maven2Config extends AbstractMavenConfig {
 
 	private static final Logger log = Logger.getLogger(Maven2Config.class);
-	public static final String MVN2 = ".mvn2";
-	public static final String M2_CAPABILITY_PREFIX = CapabilityDefaultsHelper.CAPABILITY_BUILDER_PREFIX + MVN2;
-	private static final String M2_EXECUTABLE_NAME = "mvn";
+	private static final String MVN2 = ".mvn2";
+	private static final String M2_CAPABILITY_PREFIX = CapabilityDefaultsHelper.CAPABILITY_BUILDER_PREFIX + MVN2;
+	static final String M2_EXECUTABLE_NAME = "mvn";
 
 	public Maven2Config(@NotNull TaskContext taskContext, @NotNull CapabilityContext capabilityContext,
 						@NotNull EnvironmentVariableAccessor environmentVariableAccessor, Map<String, String> bambooSystemProperties) {

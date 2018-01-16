@@ -3,9 +3,7 @@ package org.whitesource.bamboo.plugin.config;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.atlassian.bamboo.build.logger.BuildLogger;
 import com.atlassian.bamboo.v2.build.agent.capability.CapabilityDefaultsHelper;
@@ -25,6 +23,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.whitesource.bamboo.plugin.Constants;
 import org.whitesource.bamboo.plugin.freestyle.WssUtils;
+
+import static org.whitesource.bamboo.plugin.config.Maven2Config.M2_EXECUTABLE_NAME;
 
 
 public abstract class AbstractMavenConfig {
@@ -101,7 +101,8 @@ public abstract class AbstractMavenConfig {
 		}
 
         // set commandline
-        commandline.add(getMavenExecutablePath(builderPath));
+		String mavenPath = getMavenExecutablePath(builderPath);
+        commandline.add(mavenPath);
         if (StringUtils.isNotEmpty(projectFilename)) {
             commandline.addAll(Arrays.asList("-f", projectFilename));
         }
@@ -112,7 +113,8 @@ public abstract class AbstractMavenConfig {
 
 	@NotNull
 	protected String getMavenExecutablePath(@NotNull String homePath) {
-		String pathToExecutable = StringUtils.join(new String[] { homePath, "bin", executableName }, File.separator);
+		String pathToBin = StringUtils.join(new String[]{homePath, "bin"}, File.separator);
+		String pathToExecutable = StringUtils.join(new String[]{pathToBin, executableName}, File.separator);
 
 		if (StringUtils.contains(pathToExecutable, " ")) {
 			try {
@@ -122,10 +124,31 @@ public abstract class AbstractMavenConfig {
 				log.warn("IO Exception trying to get executable", e);
 			}
 		}
+		return handleMissingExecutable(pathToBin, pathToExecutable);
+	}
+
+	private String handleMissingExecutable(String pathToBin, String pathToExecutable) {
+		if (!new File(pathToExecutable).exists()) {
+			List<File> files = getMvnFiles(pathToBin);
+			if (files.size() > 0) {
+				return files.get(0).toString();
+			}
+		}
 		return pathToExecutable;
 	}
-	
-	
+
+	private List<File> getMvnFiles(String pathToBin) {
+		File[] files = new File(pathToBin).listFiles();
+		List<File> filesFiltered = new ArrayList<>();
+		for (File file : files) {
+			if (file.getName().contains(M2_EXECUTABLE_NAME + ".")) {
+				filesFiltered.add(file);
+			}
+		}
+		return filesFiltered;
+	}
+
+
 	public static TaskDefinition findMavenTask(TaskContext taskContext) {
 		List<TaskDefinition> taskDefinations = taskContext.getBuildContext().getBuildDefinition().getTaskDefinitions();
 		TaskDefinition 	mavenTask;
