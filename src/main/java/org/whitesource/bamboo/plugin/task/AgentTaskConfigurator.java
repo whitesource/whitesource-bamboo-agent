@@ -1,27 +1,27 @@
 package org.whitesource.bamboo.plugin.task;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import com.atlassian.bamboo.build.Job;
 import com.atlassian.bamboo.chains.Chain;
 import com.atlassian.bamboo.collections.ActionParametersMap;
 import com.atlassian.bamboo.plan.Plan;
+import com.atlassian.bamboo.plugin.BambooPluginUtils;
 import com.atlassian.bamboo.task.AbstractTaskConfigurator;
 import com.atlassian.bamboo.task.TaskDefinition;
 import com.atlassian.bamboo.task.TaskRequirementSupport;
 import com.atlassian.bamboo.util.Narrow;
-import com.atlassian.bamboo.utils.BambooPredicates;
 import com.atlassian.bamboo.utils.error.ErrorCollection;
 import com.atlassian.bamboo.v2.build.agent.capability.Requirement;
-import com.google.common.collect.Iterables;
+import io.atlassian.fugue.Iterables;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 
 import static org.whitesource.bamboo.plugin.Constants.*;
+
 
 public class AgentTaskConfigurator extends AbstractTaskConfigurator implements TaskRequirementSupport {
 	
@@ -124,11 +124,9 @@ public class AgentTaskConfigurator extends AbstractTaskConfigurator implements T
 	@Nullable
 	public static Job findMavenJob(@NotNull Chain chain) {
 		for (Job job : chain.getAllJobs()) {
-			if (Iterables.any(job.getBuildDefinition().getTaskDefinitions(), BambooPredicates
-					.isTaskDefinitionPluginKeyEqual("com.atlassian.bamboo.plugins.maven:task.builder.mvn2"))) {
+			if (Iterables.any(job.getBuildDefinition().getTaskDefinitions(), BambooPluginUtils.pluginKeyEquals("com.atlassian.bamboo.plugins.maven:task.builder.mvn2"))) {
 				return job;
-			} else if (Iterables.any(job.getBuildDefinition().getTaskDefinitions(), BambooPredicates
-					.isTaskDefinitionPluginKeyEqual("com.atlassian.bamboo.plugins.maven:task.builder.mvn3"))) {
+			} else if (Iterables.any(job.getBuildDefinition().getTaskDefinitions(), BambooPluginUtils.pluginKeyEquals("com.atlassian.bamboo.plugins.maven:task.builder.mvn3"))) {
 				return job;
 			}
 		}

@@ -1,6 +1,5 @@
 package org.whitesource.bamboo.plugin.task;
 
-import com.amazonaws.util.IOUtils;
 import com.atlassian.bamboo.build.logger.BuildLogger;
 import com.atlassian.bamboo.build.logger.interceptors.ErrorMemorisingInterceptor;
 import com.atlassian.bamboo.build.logger.interceptors.LogMemorisingInterceptor;
@@ -9,17 +8,17 @@ import com.atlassian.bamboo.builder.MavenLogHelper;
 import com.atlassian.bamboo.configuration.ConfigurationMap;
 import com.atlassian.bamboo.plan.artifact.ArtifactDefinitionContext;
 import com.atlassian.bamboo.plan.artifact.ArtifactDefinitionContextImpl;
+import com.atlassian.bamboo.plugin.BambooPluginUtils;
 import com.atlassian.bamboo.process.EnvironmentVariableAccessor;
 import com.atlassian.bamboo.process.ExternalProcessBuilder;
 import com.atlassian.bamboo.process.ProcessService;
 import com.atlassian.bamboo.security.SecureToken;
 import com.atlassian.bamboo.task.*;
-import com.atlassian.bamboo.utils.BambooPredicates;
 import com.atlassian.bamboo.v2.build.BuildContext;
 import com.atlassian.bamboo.v2.build.CurrentBuildResult;
 import com.atlassian.bamboo.v2.build.agent.capability.CapabilityContext;
 import com.atlassian.utils.process.ExternalProcess;
-import com.google.common.collect.Iterables;
+import io.atlassian.fugue.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,8 @@ import org.whitesource.bamboo.plugin.freestyle.BaseOssInfoExtractor;
 import org.whitesource.bamboo.plugin.freestyle.GenericOssInfoExtractor;
 import org.whitesource.bamboo.plugin.freestyle.WssUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -91,11 +91,9 @@ public class AgentTask implements TaskType {
         if (MAVEN_TYPE.equals(projectType)) {
             List<TaskDefinition> taskDefs = taskContext.getBuildContext().getBuildDefinition().getTaskDefinitions();
 
-            if (Iterables.any(taskDefs, BambooPredicates
-                    .isTaskDefinitionPluginKeyEqual("com.atlassian.bamboo.plugins.maven:task.builder.mvn2"))) {
+            if (Iterables.any(taskDefs, BambooPluginUtils.pluginKeyEquals("com.atlassian.bamboo.plugins.maven:task.builder.mvn2"))) {
                 config = new Maven2Config(taskContext, capabilityContext, environmentVariableAccessor, bambooSystemProperties);
-            } else if (Iterables.any(taskDefs, BambooPredicates
-                    .isTaskDefinitionPluginKeyEqual("com.atlassian.bamboo.plugins.maven:task.builder.mvn3"))) {
+            } else if (Iterables.any(taskDefs, BambooPluginUtils.pluginKeyEquals("com.atlassian.bamboo.plugins.maven:task.builder.mvn3"))) {
                 config = new Maven3Config(taskContext, capabilityContext, environmentVariableAccessor, bambooSystemProperties);
             }
 
