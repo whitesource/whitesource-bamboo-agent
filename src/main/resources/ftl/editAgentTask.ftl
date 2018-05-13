@@ -14,6 +14,7 @@
 	<div class="matrix">
 	[@ww.radio labelKey="org.whitesource.bamboo.plugins.projectType" name="projectType" list="projectTypes" toggle="true"/]
 	</div>
+	[@ww.textfield labelKey="org.whitesource.bamboo.plugins.userKey" name="userKey" cssClass="long-field"/]
 	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.checkPolicies" name="checkPolicies"/]
 	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.forceUpdate" name="forceUpdate"/]
 	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.failOnError" name="failOnError" /]
@@ -31,6 +32,7 @@
 [#elseif mode == "edit"]
 	[@ww.textfield labelKey="org.whitesource.bamboo.plugins.apiKey" name="apiKey" cssClass="long-field" required='true'/]
 	[@ww.label labelKey="org.whitesource.bamboo.plugins.projectType" name="projectType"/]
+	[@ww.textfield labelKey="org.whitesource.bamboo.plugins.userKey" name="userKey" cssClass="long-field"/]
 	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.checkPolicies" name="checkPolicies"/]
 	[@ww.checkbox labelKey="org.whitesource.bamboo.plugins.forceUpdate" name="forceUpdate"/]
 	[@ww.hidden  name="projectTypeForValidation" value="${projectType}"/]

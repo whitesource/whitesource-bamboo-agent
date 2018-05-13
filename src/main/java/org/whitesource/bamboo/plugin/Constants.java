@@ -14,6 +14,7 @@ public class Constants {
 	public static final String CONTACT_SUPPORT = "Encountered internal plugin error - please contact support!";
 	
 	public static final String API_KEY = "apiKey";
+	public static final String USER_KEY = "userKey";
 	public static final String CHECK_POLICIES = "checkPolicies";
 	public static final String FORCE_UPDATE = "forceUpdate";
 

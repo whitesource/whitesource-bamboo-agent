@@ -155,7 +155,7 @@ public class AgentTask implements TaskType {
                                               final Map<String, String> configurationMap) {
         buildLogger.addBuildLogEntry("WhiteSource configuration:");
         for (Entry<String, String> variable : configurationMap.entrySet()) {
-            final String value = variable.getKey().equals(API_KEY) || variable.getKey().equals(PROXY_PASSWORD)? "********" : variable.getValue();
+            final String value = variable.getKey().equals(API_KEY) || variable.getKey().equals(PROXY_PASSWORD) || variable.getKey().equals(USER_KEY) ? "********" : variable.getValue();
 
             buildLogger.addBuildLogEntry("... " + variable.getKey() + " is '" + value + "'");
             if (!isSubstitutionValid(value)) {
@@ -197,6 +197,7 @@ public class AgentTask implements TaskType {
 
             try {
                 final String apiKey = configurationMap.get(API_KEY);
+                final String userKey = configurationMap.get(USER_KEY);
                 String productTokenOrName = configurationMap.get(PRODUCT_TOKEN);
                 final String productVersion = configurationMap.get(PRODUCT_VERSION);
 
@@ -209,7 +210,8 @@ public class AgentTask implements TaskType {
 
                 if (checkPolicies) {
                     buildLogger.addBuildLogEntry("Checking policies ...");
-                    CheckPolicyComplianceResult result = service.checkPolicyCompliance(apiKey, productTokenOrName, productVersion, projectInfos, true);
+                    CheckPolicyComplianceResult result = service.checkPolicyCompliance(apiKey, productTokenOrName, productVersion, projectInfos,
+                            true, userKey);
                     reportCheckPoliciesResult(result, buildContext, buildDirectory, buildLogger);
 
                     if (result.hasRejections()) {
@@ -221,17 +223,17 @@ public class AgentTask implements TaskType {
                         } else {
                             buildLogger.addBuildLogEntry("Some dependencies violate open source policies, however all" +
                                     " were force updated to organization inventory.");
-                            updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos);
+                            updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos, userKey);
                             taskResult = taskResultBuilder.failedWithError().build();
                         }
                     } else {
-                        updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos);
+                        updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos, userKey);
                     }
 
                 } else {
                     // no policy check
                     buildLogger.addBuildLogEntry("Not checked any policies and updating results.");
-                    updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos);
+                    updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos, userKey);
                 }
                 // add support token
                 String requestToken = updateResult.getRequestToken();
@@ -465,6 +467,11 @@ public class AgentTask implements TaskType {
         final String apiKey = configurationMap.get(API_KEY);
         StringBuilder confParam = new StringBuilder();
         confParam.append(MAVEN_D_PARAMETER).append("org.whitesource.orgToken").append(EQUALS_SIGN).append(apiKey);
+        final String userKey = configurationMap.get(USER_KEY);
+        StringBuilder userKeyParam = new StringBuilder();
+        userKeyParam.append(MAVEN_D_PARAMETER).append("org.whitesource.userKey").append(EQUALS_SIGN).append(userKey);
+
+
         StringBuilder failOnErrorParam = new StringBuilder();
         failOnErrorParam.append(MAVEN_D_PARAMETER).append("org.whitesource.failOnError").append(EQUALS_SIGN).append(configurationMap.getAsBoolean(FAIL_ON_ERROR));
         StringBuilder failOnConnectionErrorParam = new StringBuilder();
@@ -473,6 +480,7 @@ public class AgentTask implements TaskType {
         connectionRetriesParam.append(MAVEN_D_PARAMETER).append("org.whitesource.connectionRetries").append(EQUALS_SIGN).append(String.valueOf(connectionRetries));
 
         mavenCmd.add(confParam.toString());
+        mavenCmd.add(userKeyParam.toString());
         mavenCmd.add(failOnErrorParam.toString());
         mavenCmd.add(failOnConnectionErrorParam.toString());
         mavenCmd.add(connectionRetriesParam.toString());
