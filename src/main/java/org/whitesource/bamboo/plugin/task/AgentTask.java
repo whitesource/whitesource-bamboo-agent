@@ -484,7 +484,6 @@ public class AgentTask implements TaskType {
         mavenCmd.add(failOnErrorParam.toString());
         mavenCmd.add(failOnConnectionErrorParam.toString());
         mavenCmd.add(connectionRetriesParam.toString());
-        mavenCmd.add(userKey.toString());
         mavenCmd.addAll(populateaParams(taskContext));
 
         // we will do check policies only for FAIL_CHECK_POLICIES case.
