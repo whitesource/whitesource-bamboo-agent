@@ -469,7 +469,7 @@ public class AgentTask implements TaskType {
         confParam.append(MAVEN_D_PARAMETER).append("org.whitesource.orgToken").append(EQUALS_SIGN).append(apiKey);
         final String userKey = configurationMap.get(USER_KEY);
         StringBuilder userKeyParam = new StringBuilder();
-        userKeyParam.append(MAVEN_D_PARAMETER).append("org.whitesource.orgUserKey").append(EQUALS_SIGN).append(userKey);
+        userKeyParam.append(MAVEN_D_PARAMETER).append("org.whitesource.userKey").append(EQUALS_SIGN).append(userKey);
 
 
         StringBuilder failOnErrorParam = new StringBuilder();
