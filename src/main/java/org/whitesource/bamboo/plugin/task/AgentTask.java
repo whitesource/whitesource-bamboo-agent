@@ -251,7 +251,6 @@ public class AgentTask implements TaskType {
                     buildLogger.addBuildLogEntry("WhiteSource project create/update sucessfully");
                     logUpdateResult(updateResult, buildLogger);
                 }
-
             } catch (WssServiceException e) {
                 buildLogger.addErrorLogEntry("Communication with WhiteSource failed: " + e.getMessage());
                 if (isConnectionError(e)) {
