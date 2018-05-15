@@ -54,6 +54,7 @@ public class AgentTask implements TaskType {
     private static final Integer DEFAULT_CONNECTION_RETRIES = 1;
     public static final String MAVEN_D_PARAMETER = "-D";
     public static final String REQUEST_TOKEN = "requestToken";
+    public static final String EMPTY_STRING = "";
 
     /* --- Members --- */
 
@@ -371,6 +372,13 @@ public class AgentTask implements TaskType {
         List<String> includes;
         List<String> exclude;
 
+        final String userKey = configurationMap.get(USER_KEY);
+        if (userKey != null || userKey.equals(EMPTY_STRING)) {
+            StringBuilder userKeyParam = new StringBuilder();
+            userKeyParam.append(MAVEN_D_PARAMETER).append("org.whitesource.userKey").append(EQUALS_SIGN).append(userKey);
+            paramsList.add(userKeyParam.toString());
+        }
+
         final String productToken = configurationMap.get(PRODUCT_TOKEN);
         StringBuilder productTokenParam = new StringBuilder();
 
@@ -467,9 +475,6 @@ public class AgentTask implements TaskType {
         final String apiKey = configurationMap.get(API_KEY);
         StringBuilder confParam = new StringBuilder();
         confParam.append(MAVEN_D_PARAMETER).append("org.whitesource.orgToken").append(EQUALS_SIGN).append(apiKey);
-        final String userKey = configurationMap.get(USER_KEY);
-        StringBuilder userKeyParam = new StringBuilder();
-        userKeyParam.append(MAVEN_D_PARAMETER).append("org.whitesource.userKey").append(EQUALS_SIGN).append(userKey);
 
 
         StringBuilder failOnErrorParam = new StringBuilder();
@@ -480,7 +485,6 @@ public class AgentTask implements TaskType {
         connectionRetriesParam.append(MAVEN_D_PARAMETER).append("org.whitesource.connectionRetries").append(EQUALS_SIGN).append(String.valueOf(connectionRetries));
 
         mavenCmd.add(confParam.toString());
-        mavenCmd.add(userKeyParam.toString());
         mavenCmd.add(failOnErrorParam.toString());
         mavenCmd.add(failOnConnectionErrorParam.toString());
         mavenCmd.add(connectionRetriesParam.toString());
