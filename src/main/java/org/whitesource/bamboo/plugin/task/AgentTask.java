@@ -365,7 +365,7 @@ public class AgentTask implements TaskType {
 
     }
 
-    private List<String> populateaParams(TaskContext taskContext) {
+    private List<String> populateParams(TaskContext taskContext) {
         List<String> paramsList = new ArrayList<String>();
         final ConfigurationMap configurationMap = taskContext.getConfigurationMap();
         Map<String, String> moduleTokens;
@@ -373,7 +373,7 @@ public class AgentTask implements TaskType {
         List<String> exclude;
 
         final String userKey = configurationMap.get(USER_KEY);
-        if (userKey != null || userKey.equals(EMPTY_STRING)) {
+        if (!userKey.equals(EMPTY_STRING)) {
             StringBuilder userKeyParam = new StringBuilder();
             userKeyParam.append(MAVEN_D_PARAMETER).append("org.whitesource.userKey").append(EQUALS_SIGN).append(userKey);
             paramsList.add(userKeyParam.toString());
@@ -488,7 +488,7 @@ public class AgentTask implements TaskType {
         mavenCmd.add(failOnErrorParam.toString());
         mavenCmd.add(failOnConnectionErrorParam.toString());
         mavenCmd.add(connectionRetriesParam.toString());
-        mavenCmd.addAll(populateaParams(taskContext));
+        mavenCmd.addAll(populateParams(taskContext));
 
         // we will do check policies only for FAIL_CHECK_POLICIES case.
         if (checkPolicies) {
