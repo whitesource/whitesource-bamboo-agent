@@ -372,7 +372,7 @@ public class AgentTask implements TaskType {
         List<String> exclude;
 
         final String userKey = configurationMap.get(USER_KEY);
-        if (!userKey.equals(EMPTY_STRING)) {
+        if (StringUtils.isNotBlank(userKey)) {
             StringBuilder userKeyParam = new StringBuilder();
             userKeyParam.append(MAVEN_D_PARAMETER).append("org.whitesource.userKey").append(EQUALS_SIGN).append(userKey);
             paramsList.add(userKeyParam.toString());
