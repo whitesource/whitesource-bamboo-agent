@@ -353,15 +353,17 @@ public class AgentTask implements TaskType {
     }
 
     private void logUpdateResult(UpdateInventoryResult result, BuildLogger buildLogger) {
-
         log.info(WssUtils.logMsg(LOG_COMPONENT, "Update success"));
         buildLogger.addBuildLogEntry("WhiteSource update results: ");
         buildLogger.addBuildLogEntry("WhiteSource organization: " + result.getOrganization());
         buildLogger.addBuildLogEntry(result.getCreatedProjects().size() + " Newly created projects:");
-        StringUtils.join(result.getCreatedProjects(), ",");
+        for (String projectName : result.getCreatedProjects()) {
+            buildLogger.addBuildLogEntry("# " + projectName);
+        }
         buildLogger.addBuildLogEntry(result.getUpdatedProjects().size() + " existing projects were updated:");
-        StringUtils.join(result.getUpdatedProjects(), ",");
-
+        for (String projectName : result.getUpdatedProjects()) {
+            buildLogger.addBuildLogEntry("# " + projectName);
+        }
     }
 
     private List<String> populateParams(TaskContext taskContext) {
@@ -372,7 +374,7 @@ public class AgentTask implements TaskType {
         List<String> exclude;
 
         final String userKey = configurationMap.get(USER_KEY);
-        if (!userKey.equals(EMPTY_STRING)) {
+        if (StringUtils.isNotBlank(userKey)) {
             StringBuilder userKeyParam = new StringBuilder();
             userKeyParam.append(MAVEN_D_PARAMETER).append("org.whitesource.userKey").append(EQUALS_SIGN).append(userKey);
             paramsList.add(userKeyParam.toString());
