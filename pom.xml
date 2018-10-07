@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.whitesource.bamboo.plugins</groupId>
 	<artifactId>whitesource-bamboo-agent</artifactId>
-	<version>18.9.1-SNAPSHOT</version>
+	<version>18.9.1</version>
 
 	<organization>
 		<name>WhiteSource Software Ltd.</name>
@@ -16,11 +16,11 @@
 	<description>WhiteSource external update agent for Atlassian Bamboo.</description>
 	<packaging>atlassian-plugin</packaging>
 	<developers>
-        <developer>
-            <id>gangadharingithub</id>
-            <name>Gangadhar M</name>
-            <email>mailme.m.gangadhar@gmail.com</email>
-        </developer>
+		<developer>
+			<id>annarozin</id>
+			<name>Anna Rozin</name>
+			<email>anna.rozin@whitesourcesoftware.com</email>
+		</developer>
     </developers>
 	<properties>
 		<bamboo.version>6.5.0</bamboo.version>
