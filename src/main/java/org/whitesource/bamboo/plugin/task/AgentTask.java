@@ -23,7 +23,9 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import org.whitesource.agent.api.dispatch.CheckPolicyComplianceRequest;
 import org.whitesource.agent.api.dispatch.CheckPolicyComplianceResult;
+import org.whitesource.agent.api.dispatch.UpdateInventoryRequest;
 import org.whitesource.agent.api.dispatch.UpdateInventoryResult;
 import org.whitesource.agent.api.model.AgentProjectInfo;
 import org.whitesource.agent.client.WhitesourceService;
@@ -211,8 +213,12 @@ public class AgentTask implements TaskType {
 
                 if (checkPolicies) {
                     buildLogger.addBuildLogEntry("Checking policies ...");
-                    CheckPolicyComplianceResult result = service.checkPolicyCompliance(apiKey, productTokenOrName, productVersion, projectInfos,
-                            true, userKey);
+                    CheckPolicyComplianceRequest checkComplianceRequest = new CheckPolicyComplianceRequest(apiKey,projectInfos,true);
+                    checkComplianceRequest.setProductVersion(productVersion);
+                    checkComplianceRequest.setProduct(productTokenOrName);
+                    checkComplianceRequest.setUserKey(userKey);
+                    CheckPolicyComplianceResult result =service.checkPolicyCompliance(checkComplianceRequest);
+
                     reportCheckPoliciesResult(result, buildContext, buildDirectory, buildLogger);
 
                     if (result.hasRejections()) {
@@ -224,17 +230,20 @@ public class AgentTask implements TaskType {
                         } else {
                             buildLogger.addBuildLogEntry("Some dependencies violate open source policies, however all" +
                                     " were force updated to organization inventory.");
-                            updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos, userKey);
+                            UpdateInventoryRequest updateInventoryRequest = new UpdateInventoryRequest(apiKey,productTokenOrName,productVersion,projectInfos,userKey,null);
+                            updateResult = service.update(updateInventoryRequest);
                             taskResult = taskResultBuilder.failedWithError().build();
                         }
                     } else {
-                        updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos, userKey);
+                        UpdateInventoryRequest updateInventoryRequest = new UpdateInventoryRequest(apiKey,productTokenOrName,productVersion,projectInfos,userKey,null);
+                        updateResult = service.update(updateInventoryRequest);
                     }
 
                 } else {
                     // no policy check
                     buildLogger.addBuildLogEntry("Not checked any policies and updating results.");
-                    updateResult = service.update(apiKey, productTokenOrName, productVersion, projectInfos, userKey);
+                    UpdateInventoryRequest updateInventoryRequest = new UpdateInventoryRequest(apiKey,productTokenOrName,productVersion,projectInfos,userKey,null);
+                    updateResult = service.update(updateInventoryRequest);
                 }
                 // add support token
                 String requestToken = updateResult.getRequestToken();
