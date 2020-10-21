@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.whitesource.bamboo.plugins</groupId>
 	<artifactId>whitesource-bamboo-agent</artifactId>
-	<version>20.4.1-SNAPSHOT</version>
+	<version>20.10.2-SNAPSHOT</version>
 
 	<organization>
 		<name>WhiteSource Software Ltd.</name>
@@ -86,7 +86,7 @@
 		<dependency>
 		    <groupId>junit</groupId>
 		    <artifactId>junit</artifactId>
-		   <version>4.12</version>
+		   <version>4.13.1</version>
 		    <scope>test</scope>
 		</dependency>
 		
