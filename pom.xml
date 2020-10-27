@@ -31,7 +31,7 @@
 		<!-- This key is used to keep the consistency between the key in atlassian-plugin.xml 
 			and the key to generate bundle. -->
 		<atlassian.plugin.key>${project.groupId}.${project.artifactId}</atlassian.plugin.key>
-		<wss.agents.version>2.9.5</wss.agents.version>
+		<wss.agents.version>2.9.9.58</wss.agents.version>
 	</properties>
 
 	<dependencies>

@@ -347,6 +347,8 @@ public class AgentTask implements TaskType {
         thread.setContextClassLoader(this.getClass().getClassLoader());
         try {
             reportArchive = report.generate(buildDirectory, true);
+        } catch (Exception e) {
+            log.info(LOG_COMPONENT, e);
         } finally {
             thread.setContextClassLoader(loader);
         }
