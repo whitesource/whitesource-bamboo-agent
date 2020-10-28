@@ -348,7 +348,7 @@ public class AgentTask implements TaskType {
         try {
             reportArchive = report.generate(buildDirectory, true);
         } catch (Exception e) {
-            log.info(LOG_COMPONENT, e);
+            log.info(WssUtils.logMsg(LOG_COMPONENT, e.getMessage()));
         } finally {
             thread.setContextClassLoader(loader);
         }
